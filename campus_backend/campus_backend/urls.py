@@ -17,8 +17,17 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings  # ✅ Ensure this is imported
+from django.conf.urls.static import static  # ✅ Ensure this is imported
+
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('user_auth/', include('user_auth.urls'))
+    path('user_auth/', include('user_auth.urls')),
+    path('listings/', include('listings.urls'))
 ]
+
+
+# Serve media files in development mode
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
