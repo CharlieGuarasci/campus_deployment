@@ -1,6 +1,10 @@
-import { Link } from "react-router-dom";
+import { use } from "react";
+import { Link, useNavigate } from "react-router-dom";
+
 
 const Header = () => {
+  const navigate = useNavigate();
+
   return (
     <header className="bg-white shadow-md w-full">
       <div className="flex items-center justify-between px-6 h-16">
@@ -45,12 +49,18 @@ const Header = () => {
             </Link>
           </nav>
 
-          {/* Sign In / Register Buttons */}
-          <div className="flex space-x-4">
-            <button className="border border-gray-300 px-4 py-2 rounded-md hover:bg-gray-100 transition h-10">
+           {/* Sign In / Register Buttons */}
+           <div className="flex space-x-4">
+            <button 
+              onClick={() => navigate("/signin")} 
+              className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition h-10"
+            >
               Sign In
             </button>
-            <button className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition h-10">
+            <button 
+              onClick={() => navigate("/register")} 
+              className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition h-10"
+            >
               Register
             </button>
           </div>
