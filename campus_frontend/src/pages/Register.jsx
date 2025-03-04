@@ -1,13 +1,18 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import ShowHideButton from "../components/ShowHideButton";
+
 
 const Register = () => {
   const navigate = useNavigate();
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
 
   const handleRegister = async (e) => {
@@ -19,7 +24,12 @@ const Register = () => {
     }
 
     try {
-      await axios.post("http://localhost:8000/api/register/", { email, password });
+      await axios.post("http://localhost:8000/api/register/", { 
+        first_name: firstName,
+        last_name: lastName,
+        email, 
+        password 
+      });
       navigate("/signin"); // Redirect to sign-in after successful registration
     } catch (err) {
       setError("Registration failed. Try a different email.");
@@ -27,12 +37,31 @@ const Register = () => {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen w-screen bg-gray-100 text-black">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
+    <div className="flex justify-center items-center h-screen w-screen bg-white text-black">
+      <div className="bg-white p-8 rounded-lg w-full max-w-lg">
         <h2 className="text-2xl font-semibold mb-1 text-center">Join Campus</h2>
         <p className="text-gray-600 text-center mb-6">Make some money off those old textbooks</p>
 
         <form onSubmit={handleRegister} className="space-y-4">
+          <div className="flex gap-4">
+            <input
+              type="text"
+              placeholder="First Name"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              required
+              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <input
+              type="text"
+              placeholder="Last Name"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              required
+              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
           <input
             type="email"
             placeholder="Email"
@@ -51,24 +80,25 @@ const Register = () => {
               required
               className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+            <ShowHideButton
+              showPassword={showPassword}
+              onClick={() => setShowPassword(!showPassword)}
+            />
           </div>
 
           <div className="relative">
             <input
-              type={showPassword ? "text" : "password"}
+              type={showConfirmPassword ? "text" : "password"}
               placeholder="Confirm Password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-1 top-1 text-white text-sm"
-            >
-              {showPassword ? "Hide" : "Show"}
-            </button>
+            <ShowHideButton
+              showPassword={showConfirmPassword}
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            />
           </div>
 
           <button type="submit" className="w-full bg-blue-600 text-white py-3 rounded-lg ">
