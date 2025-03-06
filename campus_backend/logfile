@@ -1,0 +1,35 @@
+2025-03-05 21:10:26.005 EST [5648] LOG:  starting PostgreSQL 14.17 (Homebrew) on aarch64-apple-darwin24.2.0, compiled by Apple clang version 16.0.0 (clang-1600.0.26.6), 64-bit
+2025-03-05 21:10:26.006 EST [5648] LOG:  could not bind IPv6 address "::1": Address already in use
+2025-03-05 21:10:26.006 EST [5648] HINT:  Is another postmaster already running on port 5432? If not, wait a few seconds and retry.
+2025-03-05 21:10:26.006 EST [5648] LOG:  could not bind IPv4 address "127.0.0.1": Address already in use
+2025-03-05 21:10:26.006 EST [5648] HINT:  Is another postmaster already running on port 5432? If not, wait a few seconds and retry.
+2025-03-05 21:10:26.006 EST [5648] WARNING:  could not create listen socket for "localhost"
+2025-03-05 21:10:26.006 EST [5648] FATAL:  could not create any TCP/IP sockets
+2025-03-05 21:10:26.007 EST [5648] LOG:  database system is shut down
+2025-03-05 21:11:03.707 EST [5686] LOG:  starting PostgreSQL 14.17 (Homebrew) on aarch64-apple-darwin24.2.0, compiled by Apple clang version 16.0.0 (clang-1600.0.26.6), 64-bit
+2025-03-05 21:11:03.710 EST [5686] LOG:  could not bind IPv6 address "::1": Address already in use
+2025-03-05 21:11:03.710 EST [5686] HINT:  Is another postmaster already running on port 5432? If not, wait a few seconds and retry.
+2025-03-05 21:11:03.710 EST [5686] LOG:  could not bind IPv4 address "127.0.0.1": Address already in use
+2025-03-05 21:11:03.710 EST [5686] HINT:  Is another postmaster already running on port 5432? If not, wait a few seconds and retry.
+2025-03-05 21:11:03.710 EST [5686] WARNING:  could not create listen socket for "localhost"
+2025-03-05 21:11:03.710 EST [5686] FATAL:  could not create any TCP/IP sockets
+2025-03-05 21:11:03.711 EST [5686] LOG:  database system is shut down
+2025-03-05 21:13:14.638 EST [6006] LOG:  starting PostgreSQL 14.17 (Homebrew) on aarch64-apple-darwin24.2.0, compiled by Apple clang version 16.0.0 (clang-1600.0.26.6), 64-bit
+2025-03-05 21:13:14.640 EST [6006] LOG:  listening on IPv6 address "::1", port 5432
+2025-03-05 21:13:14.640 EST [6006] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2025-03-05 21:13:14.640 EST [6006] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2025-03-05 21:13:14.643 EST [6007] LOG:  database system was shut down at 2025-03-05 21:10:19 EST
+2025-03-05 21:13:14.645 EST [6006] LOG:  database system is ready to accept connections
+2025-03-05 21:13:48.916 EST [6274] FATAL:  role "campus" does not exist
+2025-03-05 21:13:57.354 EST [6287] FATAL:  role "campus" does not exist
+2025-03-05 21:14:03.466 EST [6299] FATAL:  role "campus" does not exist
+2025-03-05 21:14:18.304 EST [6315] FATAL:  role "postgres" does not exist
+2025-03-05 21:14:23.127 EST [6326] FATAL:  database "liamharpermccabe" does not exist
+2025-03-05 21:14:31.930 EST [6338] FATAL:  role "postgres" does not exist
+2025-03-05 21:14:52.830 EST [6367] FATAL:  database "liamharpermccabe" does not exist
+2025-03-05 21:15:02.131 EST [6381] FATAL:  database "liamharpermccabe" does not exist
+2025-03-05 21:15:31.574 EST [6006] LOG:  received fast shutdown request
+2025-03-05 21:15:31.574 EST [6006] LOG:  aborting any active transactions
+2025-03-05 21:15:31.575 EST [6006] LOG:  background worker "logical replication launcher" (PID 6013) exited with exit code 1
+2025-03-05 21:15:31.575 EST [6008] LOG:  shutting down
+2025-03-05 21:15:31.579 EST [6006] LOG:  database system is shut down
