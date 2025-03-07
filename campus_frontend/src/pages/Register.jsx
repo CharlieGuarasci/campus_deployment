@@ -18,18 +18,28 @@ const Register = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     
+    console.log("Password:", password);
+    console.log("Confirm Password:", confirmPassword);
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
 
     try {
-      await axios.post("http://localhost:8000/api/register/", { 
-        first_name: firstName,
-        last_name: lastName,
-        email, 
-        password 
-      });
+      await axios.post("http://127.0.0.1:8000/appuser/register/", 
+        { 
+          name: `${firstName} ${lastName}`,
+          email, 
+          password,
+          year: 2
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      );
       navigate("/signin"); // Redirect to sign-in after successful registration
     } catch (err) {
       setError("Registration failed. Try a different email.");
