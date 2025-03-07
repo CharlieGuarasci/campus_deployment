@@ -20,7 +20,9 @@ const SignIn = () => {
       });
 
       if (response.status === 200) {
-        navigate("/profile");
+        localStorage.setItem('user', JSON.stringify(response.data));
+        localStorage.setItem('showWelcomeFade', 'true');
+        navigate("/welcome");
       }
     } catch (err) {
       setError("Invalid email or password. Please try again.");

@@ -5,6 +5,7 @@ import Profile from "./pages/Profile"
 import SignIn from "./pages/SignIn";
 import Register from "./pages/Register";
 import Footer from "./components/Footer"
+import Welcome from "./pages/Welcome";
 import "./index.css";
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/welcome" element={<Welcome />} />
           </Routes>
         </div>
         <Footer />
