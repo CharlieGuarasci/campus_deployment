@@ -20,7 +20,7 @@ const SignIn = () => {
       });
 
       if (response.status === 200) {
-        localStorage.setItem('user', JSON.stringify(response.data));
+        localStorage.setItem('user', JSON.stringify(response.data.user));
         localStorage.setItem('showWelcomeFade', 'true');
         navigate("/welcome");
       }

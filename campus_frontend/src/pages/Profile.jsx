@@ -64,15 +64,39 @@ const Profile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Here you would typically make an API call to update the profile
-      // For now, we'll just update the local state
-      setUser({ ...user, ...formData });
-      localStorage.setItem('user', JSON.stringify({ ...user, ...formData }));
+      const userData = localStorage.getItem("user");
+      if (!userData) {
+        navigate("/signin");
+        return;
+      }
+  
+      const user = JSON.parse(userData);
+      if (!user?.id) {  // Ensure user.id is available
+        console.error("User ID is missing from localStorage");
+        return;
+      }
+      
+      await axios.post(
+        "http://localhost:8000/appuser/edit_profile/",
+        {
+          user_id: user.id,
+          name: formData.name || user.name,
+          bio: formData.bio || "",
+          location: formData.location || "",
+        }
+      );
+  
+      // Update local state and storage
+      const updatedUser = { ...user, ...formData };
+      setUser(updatedUser);
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+  
       setIsEditing(false);
     } catch (error) {
-      console.error('Error updating profile:', error);
+      console.error("Error updating profile:", error);
     }
   };
+
 
   const handleImageClick = () => {
     fileInputRef.current.click();
