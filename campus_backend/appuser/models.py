@@ -5,9 +5,9 @@ class AppUser(models.Model):
     name = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=255)
-    bio = models.TextField()
     year = models.IntegerField()
-    location = models.TextField()
+    bio = models.TextField(blank=True, null=True)
+    location = models.CharField(max_length=255, blank=True, null=True)
     profile_picture = models.ImageField(upload_to="profile_pics/", blank=True, null=True)
    
     def __str__(self):

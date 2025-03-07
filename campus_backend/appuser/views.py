@@ -17,9 +17,11 @@ def get_users(request):
     return Response(serializer.data)
 
 @api_view(['POST'])
+def edit_profile(request):
+    data = request.data
+@api_view(['POST'])
 def sign_in(request):
     data = request.data
-    print("Raw Request Data:", request.data)
 
     email = data.get("email")
     password = data.get("password")
