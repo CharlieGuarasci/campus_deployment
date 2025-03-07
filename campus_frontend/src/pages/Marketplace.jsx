@@ -58,12 +58,15 @@ const Marketplace = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
-            {listings.map((listing) => (
-              <BookCard 
-                key={listing.id} 
-                {...listing} 
-              />
-            ))}
+            {listings.map((listing) => {
+              console.log('Rendering listing:', listing.id);
+              return (
+                <BookCard 
+                  key={listing.id} 
+                  {...listing} 
+                />
+              );
+            })}
           </div>
         )}
       </div>

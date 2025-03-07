@@ -80,7 +80,7 @@ const ListingDetail = () => {
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-2">
             {/* Image Section */}
-            <div className="p-4 sm:p-6 flex items-center justify-center bg-gray-50">
+            <div className="p-4 sm:p-6 flex items-center justify-center bg-white">
               <div className="relative w-full aspect-square max-h-[500px]">
                 <img
                   src={imageUrl}

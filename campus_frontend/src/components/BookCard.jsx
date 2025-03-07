@@ -15,6 +15,7 @@ const BookCard = ({ id, title, course_code, price, condition, image, author, edi
   const imageUrl = image ? `http://localhost:8000/media/${image.split('/media/')[1]}` : placeholderImage;
 
   const handleClick = () => {
+    console.log('Navigating to listing:', id);
     navigate(`/listing/${id}`);
   };
 
