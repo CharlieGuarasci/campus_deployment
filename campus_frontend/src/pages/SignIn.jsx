@@ -14,13 +14,13 @@ const SignIn = () => {
     e.preventDefault();
     
     try {
-      const response = await axios.post("http://localhost:8000/user_auth/users/create/", {
+      const response = await axios.post("http://localhost:8000/appuser/signin/", {
         email,
         password,
       });
 
-      if (response.status === 201) {
-        navigate("/dashboard");
+      if (response.status === 200) {
+        navigate("/profile");
       }
     } catch (err) {
       setError("Invalid email or password. Please try again.");
