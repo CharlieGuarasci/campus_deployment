@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -8,6 +8,8 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [fadeIn, setFadeIn] = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
+  const fileInputRef = useRef(null);
   const [formData, setFormData] = useState({
     name: "",
     bio: "",
@@ -61,8 +63,38 @@ const Profile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Here you would typically make an API call to update the profile
-    setIsEditing(false);
+    try {
+      // Here you would typically make an API call to update the profile
+      // For now, we'll just update the local state
+      setUser({ ...user, ...formData });
+      localStorage.setItem('user', JSON.stringify({ ...user, ...formData }));
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    }
+  };
+
+  const handleImageClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      try {
+        // Create a preview URL for immediate display
+        const imageUrl = URL.createObjectURL(file);
+        setProfileImage(imageUrl);
+
+        // Here you would typically upload the image to your backend
+        // const formData = new FormData();
+        // formData.append('profile_picture', file);
+        // await axios.post('http://localhost:8000/appuser/upload-profile-picture/', formData);
+        
+      } catch (error) {
+        console.error('Error uploading image:', error);
+      }
+    }
   };
 
   return (
@@ -93,14 +125,31 @@ const Profile = () => {
         {/* Profile Content */}
         <div className="bg-white shadow rounded-lg p-6">
           <div className="flex items-center space-x-6 mb-6">
-            <div className="h-24 w-24 bg-gray-200 rounded-full flex items-center justify-center">
-              <span className="text-3xl text-gray-500">
-                {user?.email?.[0]?.toUpperCase() || "?"}
-              </span>
+            <div 
+              onClick={handleImageClick}
+              className="h-24 w-24 bg-gray-200 rounded-full flex items-center justify-center cursor-pointer relative group overflow-hidden"
+            >
+              {profileImage ? (
+                <img src={profileImage} alt="Profile" className="h-full w-full object-cover" />
+              ) : (
+                <span className="text-3xl text-gray-500">
+                  {user?.email?.[0]?.toUpperCase() || "?"}
+                </span>
+              )}
+              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="text-white text-sm">Change Photo</span>
+              </div>
             </div>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImageChange}
+              accept="image/*"
+              className="hidden"
+            />
             <div>
               <h2 className="text-xl font-semibold text-gray-900">
-                {user?.email || "User"}
+                {formData.name || user?.email || "User"}
               </h2>
               <p className="text-gray-600">Member since {new Date().toLocaleDateString()}</p>
             </div>
@@ -178,13 +227,13 @@ const Profile = () => {
           <div className="bg-white shadow rounded-lg p-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Account Settings</h3>
             <div className="space-y-4">
-              <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md">
+              <button className="w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-50 rounded-md">
                 Change Password
               </button>
-              <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md">
+              <button className="w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-50 rounded-md">
                 Notification Preferences
               </button>
-              <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md">
+              <button className="w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-50 rounded-md">
                 Privacy Settings
               </button>
             </div>
