@@ -14,6 +14,8 @@ const Welcome = () => {
     const fadeTimer = setTimeout(() => {
       setFadeIn(false);
       setFadeOut(true);
+      // Trigger auth change event
+      window.dispatchEvent(new Event('authChange'));
     }, 1500);
 
     // Navigate to profile after fade out (3 seconds total)

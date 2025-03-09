@@ -26,7 +26,7 @@ const Register = () => {
     }
 
     try {
-      await axios.post("http://127.0.0.1:8000/appuser/register/", 
+      const response = await axios.post("http://127.0.0.1:8000/appuser/register/", 
         { 
           name: `${firstName} ${lastName}`,
           email, 
@@ -40,6 +40,8 @@ const Register = () => {
           }
         }
       );
+      // Dispatch auth change event
+      window.dispatchEvent(new Event('authChange'));
       navigate("/signin"); // Redirect to sign-in after successful registration
     } catch (err) {
       setError("Registration failed. Try a different email.");

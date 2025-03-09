@@ -22,6 +22,8 @@ const SignIn = () => {
       if (response.status === 200) {
         localStorage.setItem('user', JSON.stringify(response.data.user));
         localStorage.setItem('showWelcomeFade', 'true');
+        // Dispatch auth change event
+        window.dispatchEvent(new Event('authChange'));
         navigate("/welcome");
       }
     } catch (err) {
