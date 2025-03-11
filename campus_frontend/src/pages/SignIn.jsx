@@ -31,6 +31,7 @@ const SignIn = () => {
     }
   };
 
+//styling
   return (
     <div className="flex justify-center min-h-screen w-screen bg-white text-black">
 
