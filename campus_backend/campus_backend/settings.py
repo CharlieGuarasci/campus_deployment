@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'chats',
     'django_extensions',
     'rest_framework_simplejwt',
+    'channels',
     'transactions'
 ]
 
