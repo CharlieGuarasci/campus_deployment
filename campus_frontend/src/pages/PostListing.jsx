@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { listingsService } from '../services/listingsService';
 import { Button } from "../components/ui/button";
+import { CategorySelect } from "../components/CategorySelect";
+import { ConditionSelect } from "../components/ConditionSelect";
+import { YearOfStudySelect } from "../components/YearOfStudySelect";
+import { GenderSelect } from "../components/GenderSelect";
+import { ModeOfTravelSelect } from "../components/ModeOfTravelSelect";
 
 const CATEGORIES = {
   BOOKS: 'Books',
@@ -127,20 +132,10 @@ const PostListing = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Category *
             </label>
-            <select
-              name="category"
+            <CategorySelect 
               value={formData.category}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border rounded-md"
-              required
-            >
-              <option value="">Select a category</option>
-              {Object.entries(CATEGORIES).map(([key, value]) => (
-                <option key={key} value={key}>
-                  {value}
-                </option>
-              ))}
-            </select>
+              onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+            />
           </div>
 
           {/* Book-specific fields */}
@@ -198,17 +193,10 @@ const PostListing = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Condition *
                 </label>
-                <select
-                  name="condition"
+                <ConditionSelect
                   value={formData.condition}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-md"
-                  required
-                >
-                  <option value="GOOD">Good</option>
-                  <option value="FAIR">Fair</option>
-                  <option value="POOR">Poor</option>
-                </select>
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, condition: value }))}
+                />
               </div>
 
               {/* Price */}
@@ -407,21 +395,10 @@ const PostListing = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Year of Study *
                 </label>
-                <select
-                  name="year_of_study"
+                <YearOfStudySelect
                   value={formData.year_of_study}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-md"
-                  required
-                >
-                  <option value="">Select year of study</option>
-                  <option value="1">First Year</option>
-                  <option value="2">Second Year</option>
-                  <option value="3">Third Year</option>
-                  <option value="4">Fourth Year</option>
-                  <option value="5+">Fifth Year or Above</option>
-                  <option value="GRAD">Graduate Student</option>
-                </select>
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, year_of_study: value }))}
+                />
               </div>
 
               {/* Image Upload */}
@@ -486,21 +463,10 @@ const PostListing = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Year of Study *
                 </label>
-                <select
-                  name="year_of_study"
+                <YearOfStudySelect
                   value={formData.year_of_study}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-md"
-                  required
-                >
-                  <option value="">Select year of study</option>
-                  <option value="1">First Year</option>
-                  <option value="2">Second Year</option>
-                  <option value="3">Third Year</option>
-                  <option value="4">Fourth Year</option>
-                  <option value="5+">Fifth Year or Above</option>
-                  <option value="GRAD">Graduate Student</option>
-                </select>
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, year_of_study: value }))}
+                />
               </div>
 
               {/* Age */}
@@ -526,20 +492,10 @@ const PostListing = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Gender *
                 </label>
-                <select
-                  name="gender"
+                <GenderSelect
                   value={formData.gender}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-md"
-                  required
-                >
-                  <option value="">Select gender</option>
-                  <option value="MALE">Male</option>
-                  <option value="FEMALE">Female</option>
-                  <option value="NON_BINARY">Non-binary</option>
-                  <option value="OTHER">Other</option>
-                  <option value="PREFER_NOT_TO_SAY">Prefer not to say</option>
-                </select>
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, gender: value }))}
+                />
               </div>
 
               {/* Program */}
@@ -700,18 +656,10 @@ const PostListing = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Mode of Travel *
                 </label>
-                <select
-                  name="mode_of_travel"
+                <ModeOfTravelSelect
                   value={formData.mode_of_travel}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-md"
-                  required
-                >
-                  <option value="">Select mode of travel</option>
-                  <option value="AUTOMOBILE">Automobile</option>
-                  <option value="TRAIN">Train</option>
-                  <option value="PLANE">Plane</option>
-                </select>
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, mode_of_travel: value }))}
+                />
               </div>
 
               {/* Date of Travel */}
@@ -786,17 +734,10 @@ const PostListing = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Condition *
                 </label>
-                <select
-                  name="condition"
+                <ConditionSelect
                   value={formData.condition}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-md"
-                  required
-                >
-                  <option value="GOOD">Good</option>
-                  <option value="FAIR">Fair</option>
-                  <option value="POOR">Poor</option>
-                </select>
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, condition: value }))}
+                />
               </div>
 
               {/* Image Upload */}
