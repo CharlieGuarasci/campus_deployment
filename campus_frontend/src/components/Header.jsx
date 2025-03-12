@@ -117,6 +117,7 @@ const Header = () => {
               <div className="relative" ref={dropdownRef}>
                 <div 
                   onClick={() => setShowDropdown(!showDropdown)}
+                  onMouseEnter={() => setShowDropdown(true)}
                   className="border border-gray-300 p-2 rounded-md hover:bg-gray-100 transition h-10 w-10 flex items-center justify-center cursor-pointer"
                 >
                   {location.pathname === "/profile" ? (
@@ -132,7 +133,10 @@ const Header = () => {
 
                 {/* Dropdown Menu */}
                 {showDropdown && (
-                  <div className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                  <div 
+                    className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
+                    onMouseLeave={() => setShowDropdown(false)}
+                  >
                     {/* User Info Section */}
                     <div className="p-4 border-b border-gray-200">
                       <div className="flex items-center space-x-3">

@@ -9,6 +9,7 @@ import Welcome from "./pages/Welcome";
 import ListingDetail from "./pages/ListingDetail";
 import Messages from "./pages/Messages";
 import Board from "./pages/Board";
+import PostListing from "./pages/PostListing";
 import "./index.css";
 
 // Wrapper component to handle conditional footer rendering
@@ -29,6 +30,7 @@ const AppContent = () => {
           <Route path="/listing/:id" element={<ListingDetail />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/board" element={<Board />} />
+          <Route path="/post-listing" element={<PostListing />} />
         </Routes>
       </div>
       {showFooter && <Footer />}
