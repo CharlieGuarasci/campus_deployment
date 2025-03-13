@@ -212,13 +212,13 @@ const Profile = () => {
                 <button
                   type="button"
                   onClick={() => setIsEditing(false)}
-                  className="px-4 py-2 text-sm font-medium text-white bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                  className="px-4 py-2 text-sm font-medium text-black bg-white border border-gray-300 rounded-md hover:bg-gray-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                  className="px-4 py-2 text-sm font-medium text-white bg-black rounded-md"
                 >
                   Save Changes
                 </button>
@@ -237,7 +237,7 @@ const Profile = () => {
               <div className="flex justify-end">
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                  className="px-4 py-2 text-sm font-medium text-white bg-black rounded-md"
                 >
                   Edit Profile
                 </button>

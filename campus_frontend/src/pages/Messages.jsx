@@ -1,91 +1,64 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { listingsService } from '../services/listingsService';
 
 const Messages = () => {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const sellerId = searchParams.get('seller');
+  const listingId = searchParams.get('listing');
+  
   // Add selected conversation state
-  const [selectedConversation, setSelectedConversation] = useState(1);
-
-  const [conversations, setConversations] = useState([
-    {
-      id: 1,
-      user: {
-        name: 'John Doe',
-        avatar: null,
-        lastMessage: 'Is this still available?',
-        timestamp: '2:30 PM'
-      },
-      product: {
-        id: 1,
-        title: 'Calculus Early Transcendentals',
-        price: '$75',
-        image: '/placeholder-book.jpg',
-        seller: 'Alice Johnson'
-      },
-      messages: [
-        {
-          id: 1,
-          sender: 'John Doe',
-          content: 'Hi, is this textbook still available?',
-          timestamp: '2:30 PM',
-          isSender: false
-        },
-        {
-          id: 2,
-          sender: 'You',
-          content: 'Yes, it is! Are you interested in buying it?',
-          timestamp: '2:31 PM',
-          isSender: true
-        },
-        {
-          id: 3,
-          sender: 'John Doe',
-          content: 'Great! Could we meet tomorrow to exchange?',
-          timestamp: '2:33 PM',
-          isSender: false
-        }
-      ]
-    },
-    {
-      id: 2,
-      user: {
-        name: 'Jane Smith',
-        avatar: null,
-        lastMessage: 'Great, I can meet tomorrow',
-        timestamp: '1:45 PM'
-      },
-      product: {
-        id: 2,
-        title: 'Physics for Scientists and Engineers',
-        price: '$65',
-        image: '/placeholder-book.jpg',
-        seller: 'Bob Wilson'
-      },
-      messages: [
-        {
-          id: 1,
-          sender: 'Jane Smith',
-          content: 'Hello! Is the physics textbook still for sale?',
-          timestamp: '1:30 PM',
-          isSender: false
-        },
-        {
-          id: 2,
-          sender: 'You',
-          content: 'Yes, it is! When would you like to meet?',
-          timestamp: '1:40 PM',
-          isSender: true
-        },
-        {
-          id: 3,
-          sender: 'Jane Smith',
-          content: 'Great, I can meet tomorrow',
-          timestamp: '1:45 PM',
-          isSender: false
-        }
-      ]
-    }
-  ]);
-
+  const [selectedConversation, setSelectedConversation] = useState(null);
+  const [conversations, setConversations] = useState([]);
   const [newMessage, setNewMessage] = useState('');
+
+  // Effect to handle new conversation from listing
+  useEffect(() => {
+    const initializeConversation = async () => {
+      if (sellerId && listingId) {
+        try {
+          // Fetch listing details
+          const listingDetails = await listingsService.getListing(listingId);
+          
+          // Check if conversation already exists
+          const existingConv = conversations.find(
+            conv => conv.product.id === listingDetails.id
+          );
+
+          if (existingConv) {
+            setSelectedConversation(existingConv.id);
+          } else {
+            // Create new conversation
+            const newConv = {
+              id: conversations.length + 1,
+              user: {
+                name: listingDetails.seller_name || 'Seller',
+                avatar: null,
+                lastMessage: '',
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+              },
+              product: {
+                id: listingDetails.id,
+                title: listingDetails.title,
+                price: `$${listingDetails.price}`,
+                image: listingDetails.image ? `http://localhost:8000/media/${listingDetails.image.split('/media/')[1]}` : '/placeholder.png',
+                seller: listingDetails.seller_name
+              },
+              messages: []
+            };
+
+            setConversations(prev => [...prev, newConv]);
+            setSelectedConversation(newConv.id);
+          }
+        } catch (error) {
+          console.error('Error initializing conversation:', error);
+        }
+      }
+    };
+
+    initializeConversation();
+  }, [sellerId, listingId]);
 
   // Get current conversation
   const currentConversation = conversations.find(conv => conv.id === selectedConversation);
@@ -140,36 +113,46 @@ const Messages = () => {
           <h2 className="text-xl font-medium text-gray-900">Messages</h2>
         </div>
         <div className="overflow-y-auto h-[calc(100vh-112px)]">
-          {conversations.map((conversation) => (
-            <div
-              key={conversation.id}
-              onClick={() => setSelectedConversation(conversation.id)}
-              className={`border-b border-gray-200 hover:bg-gray-50 cursor-pointer ${
-                selectedConversation === conversation.id ? 'bg-gray-50' : ''
-              }`}
-            >
-              <div className="p-4">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0">
-                    <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
-                      <span className="text-sm font-medium text-gray-600">
-                        {conversation.user.name[0]}
-                      </span>
+          {conversations.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-gray-500 p-4">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 mb-3">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+              </svg>
+              <p className="text-lg font-medium mb-1">No Messages Yet</p>
+              <p className="text-sm text-center">Time to make some friends! Start by browsing listings and reaching out to sellers.</p>
+            </div>
+          ) : (
+            conversations.map((conversation) => (
+              <div
+                key={conversation.id}
+                onClick={() => setSelectedConversation(conversation.id)}
+                className={`border-b border-gray-200 hover:bg-gray-50 cursor-pointer ${
+                  selectedConversation === conversation.id ? 'bg-gray-50' : ''
+                }`}
+              >
+                <div className="p-4">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-sm font-medium text-gray-600">
+                          {conversation.user.name[0]}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                  <div className="ml-3 min-w-0 flex-1">
-                    <div className="flex items-baseline justify-between">
-                      <p className="text-sm font-medium text-gray-900 truncate">{conversation.user.name}</p>
-                      <p className="text-xs text-gray-500 ml-2 flex-shrink-0">{conversation.user.timestamp}</p>
+                    <div className="ml-3 min-w-0 flex-1">
+                      <div className="flex items-baseline justify-between">
+                        <p className="text-sm font-medium text-gray-900 truncate">{conversation.user.name}</p>
+                        <p className="text-xs text-gray-500 ml-2 flex-shrink-0">{conversation.user.timestamp}</p>
+                      </div>
+                      <p className="text-sm text-gray-500 truncate mt-1">
+                        {conversation.user.lastMessage}
+                      </p>
                     </div>
-                    <p className="text-sm text-gray-500 truncate mt-1">
-                      {conversation.user.lastMessage}
-                    </p>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
 
@@ -247,7 +230,7 @@ const Messages = () => {
                 />
                 <button
                   type="submit"
-                  className="bg-blue-600 text-white px-4 py-2 text-sm rounded-md hover:bg-blue-700 transition"
+                  className="bg-black text-white px-4 py-2 text-sm rounded-md hover:bg-blue-700 transition"
                 >
                   Send
                 </button>
