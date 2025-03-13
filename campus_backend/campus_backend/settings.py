@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -34,6 +36,9 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
+    'channels',
+    'chat_messages',
     'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -43,14 +48,23 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'appuser',
-    'chat_messages',
     'listings',
     'chats',
     'django_extensions',
     'rest_framework_simplejwt',
-    'channels',
     'transactions'
 ]
+
+ASGI_APPLICATION = "campus_backend.asgi.application"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],  
+        },
+    },
+}
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (

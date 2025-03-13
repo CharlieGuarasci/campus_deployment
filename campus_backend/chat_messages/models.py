@@ -1,16 +1,13 @@
 from django.db import models
-from listings.models import Listing
-from appuser.models import AppUser
-from chats.models import Chat
+from django.apps import apps
 
 class Message(models.Model):
-    
     content = models.TextField()
     image_url = models.CharField(max_length=255, blank=True, null=True)
-    chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
-    sender = models.ForeignKey(AppUser, on_delete=models.CASCADE, related_name="messages")  
-   
+    chat = models.ForeignKey("chats.Chat", on_delete=models.CASCADE)  # Use string reference
+    sender = models.ForeignKey("appuser.AppUser", on_delete=models.CASCADE, related_name="messages")
 
     def __str__(self):
         return self.content
+
 

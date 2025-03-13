@@ -12,24 +12,37 @@ const SignIn = () => {
 
   const handleSignIn = async (e) => {
     e.preventDefault();
-    
-    try {
-      const response = await axios.post("http://localhost:8000/appuser/signin/", {
-        email,
-        password,
-      });
 
-      if (response.status === 200) {
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-        localStorage.setItem('showWelcomeFade', 'true');
-        // Dispatch auth change event
-        window.dispatchEvent(new Event('authChange'));
-        navigate("/welcome");
-      }
+    try {
+        const response = await axios.post("http://localhost:8000/appuser/signin/", {
+            email,
+            password,
+        });
+
+        if (response.status === 200) {
+            console.log("✅ Sign-in response:", response.data); // Debugging
+
+            if (!response.data.access_token) {
+                console.error("❌ No access token in response!");
+                return;
+            }
+
+            // ✅ Store tokens in localStorage
+            localStorage.setItem("access_token", response.data.access_token);
+            localStorage.setItem("refresh_token", response.data.refresh_token);
+            localStorage.setItem("user", JSON.stringify(response.data.user));
+
+            // ✅ Dispatch auth change event
+            window.dispatchEvent(new Event("authChange"));
+
+            navigate("/welcome");
+        }
     } catch (err) {
-      setError("Invalid email or password. Please try again.");
+        console.error("❌ Sign-in error:", err);
+        setError("Invalid email or password. Please try again.");
     }
-  };
+};
+
 
 //styling
   return (

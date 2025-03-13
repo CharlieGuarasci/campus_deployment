@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { listingsService } from '../services/listingsService';
 
@@ -12,6 +12,9 @@ const Messages = () => {
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [conversations, setConversations] = useState([]);
   const [newMessage, setNewMessage] = useState('');
+  const socketRef = useRef(null);
+  const messagesEndRef = useRef(null);
+
 
   // Effect to handle new conversation from listing
   useEffect(() => {
@@ -60,50 +63,93 @@ const Messages = () => {
     initializeConversation();
   }, [sellerId, listingId]);
 
-  // Get current conversation
-  const currentConversation = conversations.find(conv => conv.id === selectedConversation);
+
+
+  useEffect(() => {
+    if (!selectedConversation) return;
+    console.log(`🔄 Attempting WebSocket connection for conversation: ${selectedConversation}`);
+  
+    // Close existing WebSocket if open
+    if (socketRef.current) {
+      socketRef.current.close();
+    }
+  
+    // Create a new WebSocket connection
+    const token = localStorage.getItem("access_token"); // Assuming token is stored in localStorage
+    const ws = new WebSocket(`ws://localhost:8000/ws/chat/${selectedConversation}/?token=${token}`);
+    socketRef.current = ws;
+  
+    ws.onopen = () => {console.log("✅ Connected to WebSocket");};
+  
+    ws.onerror = (error) => {console.error("❌ WebSocket Error:", error);};
+
+    ws.onmessage = (event) => {
+      console.log("📩 WebSocket message received:", event.data);
+      try {
+        const data = JSON.parse(event.data);
+        console.log("✅ Parsed message:", data);
+    
+        setConversations((prev) =>
+          prev.map((conv) =>
+            conv.id === selectedConversation
+              ? {
+                  ...conv,
+                  messages: [...conv.messages, data],
+                  user: {
+                    ...conv.user,
+                    lastMessage: data.message,
+                    timestamp: data.timestamp,
+                  },
+                }
+              : conv
+          )
+        );
+      } catch (error) {
+        console.error("❌ Error parsing WebSocket message:", error);
+      }
+    };
+  
+    ws.onclose = () => {console.log("⚠️ WebSocket Disconnected");};
+  
+    // Cleanup function: Close WebSocket on component unmount or when `selectedConversation` changes
+    return () => {
+      console.log("🔌 Closing WebSocket...");
+      ws.close();
+    };
+  }, [selectedConversation]); // Only depend on `selectedConversation`
+  
 
   const handleSendMessage = (e) => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
-    
-    // Create new message object
-    const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const newMessageObj = {
-      id: currentConversation.messages.length + 1,
-      sender: 'You',
-      content: newMessage.trim(),
-      timestamp: currentTime,
-      isSender: true
-    };
+    if (!newMessage.trim() || !socketRef.current) return;
 
-    // Update conversations with new message
-    const updatedConversations = conversations.map(conv => {
-      if (conv.id === selectedConversation) {
-        return {
-          ...conv,
-          messages: [...conv.messages, newMessageObj],
-          user: {
-            ...conv.user,
-            lastMessage: newMessage.trim(),
-            timestamp: currentTime
-          }
-        };
-      }
-      return conv;
-    });
-    
-    setConversations(updatedConversations);
-    setNewMessage('');
+   
+    const messageData = { message: newMessage.trim() };
+    console.log("📤 Sending message:", messageData)
+    try {
+      socketRef.current.send(JSON.stringify(messageData));
+      console.log("✅ Message sent successfully");
+    } catch (error) {
+      console.error("❌ Error sending message:", error);
+    }
+    setNewMessage("");
   };
 
+
   // Auto-scroll to bottom when new message is added
-  React.useEffect(() => {
-    const messagesContainer = document.getElementById('messages-container');
-    if (messagesContainer) {
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [currentConversation?.messages]);
+    }, [conversations]);
+
+    const currentConversation = conversations.find(
+      (conv) => conv.id === selectedConversation
+    );
+    
+    if (!currentConversation) {
+      return <div className="flex h-full items-center justify-center">Select a conversation to start messaging.</div>;
+    }
 
   return (
     <div className="flex h-[calc(100vh-64px)] bg-gray-50">
@@ -122,9 +168,9 @@ const Messages = () => {
               <p className="text-sm text-center">Time to make some friends! Start by browsing listings and reaching out to sellers.</p>
             </div>
           ) : (
-            conversations.map((conversation) => (
+            conversations.map((conversation, index) => (
               <div
-                key={conversation.id}
+                key={`${conversation.id}-${index}`}
                 onClick={() => setSelectedConversation(conversation.id)}
                 className={`border-b border-gray-200 hover:bg-gray-50 cursor-pointer ${
                   selectedConversation === conversation.id ? 'bg-gray-50' : ''
