@@ -143,15 +143,17 @@ const PostListing = () => {
 
         // Fix condition field
         const formatCondition = (condition) => {
-            const validConditions = ["Poor", "Fair", "Good"];
-            return validConditions.includes(condition) ? condition : "Fair";
-        };
+          if (!condition || typeof condition !== "string") return ""; // Don't override user input
+          return condition.charAt(0).toUpperCase() + condition.slice(1).toLowerCase();
+      };
 
         // Ensure year_of_study is valid
         if (!formData.year_of_study) {
             formData.year_of_study = "First Year";
         }
-        
+        if (formData.condition) {
+          formData.condition = formatCondition(formData.condition);
+      }
 
         // Create FormData for multipart submission
         const submitData = new FormData();
