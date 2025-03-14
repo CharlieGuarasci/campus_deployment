@@ -104,7 +104,7 @@ const CATEGORIES = [
   }
 ];
 
-const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
+const Sidebar = ({ isCollapsed, setIsCollapsed, onFiltersSubmit }) => {
   const [selectedCount, setSelectedCount] = useState(0);
   
   const form = useForm({
@@ -122,8 +122,18 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
   }, [form.watch]);
 
   const onSubmit = (data) => {
-    console.log(data);
-    // Handle filter application here
+    console.log('Submitting filters:', data);
+    onFiltersSubmit(data);
+  };
+
+  // Auto-submit when clicking category in collapsed mode
+  const handleCollapsedCategoryClick = (categoryId, currentValue) => {
+    const newCategories = currentValue?.includes(categoryId)
+      ? currentValue.filter(value => value !== categoryId)
+      : [...(currentValue || []), categoryId];
+    
+    form.setValue('categories', newCategories);
+    onFiltersSubmit({ categories: newCategories });
   };
 
   return (
@@ -179,10 +189,15 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
                                 {isCollapsed ? (
                                   <div 
                                     onClick={() => {
-                                      const isCurrentlyChecked = field.value?.includes(item.id);
-                                      return isCurrentlyChecked
-                                        ? field.onChange(field.value?.filter(value => value !== item.id))
-                                        : field.onChange([...field.value, item.id]);
+                                      if (isCollapsed) {
+                                        handleCollapsedCategoryClick(item.id, field.value);
+                                      } else {
+                                        const isCurrentlyChecked = field.value?.includes(item.id);
+                                        const newValue = isCurrentlyChecked
+                                          ? field.value?.filter(value => value !== item.id)
+                                          : [...(field.value || []), item.id];
+                                        field.onChange(newValue);
+                                      }
                                     }}
                                     className={`p-1.5 rounded-md transition cursor-pointer hover:bg-gray-100 ${
                                       field.value?.includes(item.id) ? 'text-black' : 'text-gray-500'
@@ -245,16 +260,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
             ) : (
               <>
                 {/* Search and Price Range */}
-                <div className="transition-opacity duration-300">
-                  {/* Search */}
-                  <div className="mb-6">
-                    <h3 className="font-medium mb-2">Search</h3>
-                    <input
-                      type="text"
-                      className="w-full px-3 py-2 border rounded-md"
-                      placeholder="Search listings..."
-                    />
-                  </div>
+
 
                   {/* Price Range */}
                   <div className="mb-6">
@@ -272,7 +278,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
                       />
                     </div>
                   </div>
-                </div>
+
 
                 {/* Apply Filters Button */}
                 <div 

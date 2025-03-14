@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-
+import { useSearch } from '../context/SearchContext';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -9,6 +9,7 @@ const Header = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
   const [user, setUser] = useState(null);
+  const { searchTerm, setSearchTerm } = useSearch();
 
   // Function to check authentication status
   const checkAuth = () => {
@@ -56,6 +57,10 @@ const Header = () => {
     window.dispatchEvent(new Event('authChange'));
   };
 
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
   return (
     <header className="bg-white shadow-md w-full z-50 relative">
       <div className="flex items-center justify-between px-6 h-16">
@@ -67,6 +72,24 @@ const Header = () => {
             alt="Campus Logo" 
             className="h-10 w-auto min-w-[40px] object-contain"
           />
+        </div>
+
+        {/* Center: Search Bar */}
+        <div className="flex-1 max-w-md mx-6">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search listings..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              className="w-full px-4 py-2 pl-10 pr-4 rounded-md border border-gray-300 focus:outline-none focus:border-black transition-colors"
+            />
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-400">
+                <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+              </svg>
+            </div>
+          </div>
         </div>
 
         {/* Right Side: Icons & Buttons */}

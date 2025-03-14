@@ -21,20 +21,33 @@ const Messages = () => {
     const initializeConversation = async () => {
       if (sellerId && listingId) {
         try {
+          console.log("Initializing conversation with:", { sellerId, listingId });
+          console.log("Current conversations:", conversations);
+          
           // Fetch listing details
           const listingDetails = await listingsService.getListing(listingId);
+          console.log("Fetched listing details:", listingDetails);
           
-          // Check if conversation already exists
+          if (!listingDetails) {
+            console.error("No listing details found");
+            return;
+          }
+
+          // Check if conversation already exists for this listing
           const existingConv = conversations.find(
-            conv => conv.product.id === listingDetails.id
+            conv => conv.product?.id === parseInt(listingId)
           );
+          
+          console.log("Existing conversation found:", existingConv);
 
           if (existingConv) {
+            console.log("Selecting existing conversation:", existingConv.id);
             setSelectedConversation(existingConv.id);
           } else {
-            // Create new conversation
+            console.log("Creating new conversation");
+            // Create new conversation with a unique ID
             const newConv = {
-              id: conversations.length + 1,
+              id: Date.now(), // Use timestamp for unique ID
               user: {
                 name: listingDetails.seller_name || 'Seller',
                 avatar: null,
@@ -42,7 +55,7 @@ const Messages = () => {
                 timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
               },
               product: {
-                id: listingDetails.id,
+                id: parseInt(listingId),  // Ensure ID is a number
                 title: listingDetails.title,
                 price: `$${listingDetails.price}`,
                 image: listingDetails.image ? `http://localhost:8000/media/${listingDetails.image.split('/media/')[1]}` : '/placeholder.png',
@@ -51,7 +64,16 @@ const Messages = () => {
               messages: []
             };
 
-            setConversations(prev => [...prev, newConv]);
+            console.log("New conversation object:", newConv);
+            setConversations(prev => {
+              // Double check we're not adding a duplicate
+              const isDuplicate = prev.some(conv => conv.product?.id === parseInt(listingId));
+              console.log("Is duplicate check:", isDuplicate);
+              if (isDuplicate) {
+                return prev;
+              }
+              return [...prev, newConv];
+            });
             setSelectedConversation(newConv.id);
           }
         } catch (error) {
@@ -61,7 +83,7 @@ const Messages = () => {
     };
 
     initializeConversation();
-  }, [sellerId, listingId]);
+  }, [sellerId, listingId, conversations]); // Added conversations to dependencies
 
 
 

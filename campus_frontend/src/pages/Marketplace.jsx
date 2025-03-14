@@ -3,13 +3,16 @@ import Sidebar from "../components/Sidebar";
 import BookCard from "../components/BookCard";
 import { listingsService } from '../services/listingsService';
 import { useNavigate } from 'react-router-dom';
+import { useSearch } from '../context/SearchContext';
 
 const Marketplace = () => {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const { searchTerm } = useSearch();
 
   const fetchListings = async () => {
     try {
@@ -29,11 +32,26 @@ const Marketplace = () => {
     fetchListings();
   }, []);
 
+  const filteredListings = listings.filter(listing => {
+    const matchesCategories = selectedCategories.length === 0 || selectedCategories.includes(listing.category);
+    const matchesSearch = searchTerm.trim() === '' || 
+      listing.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      listing.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      listing.price.toString().includes(searchTerm);
+    
+    return matchesCategories && matchesSearch;
+  });
+
+  const handleFiltersSubmit = (filters) => {
+    console.log('Applying filters:', filters);
+    setSelectedCategories(filters.categories || []);
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-[calc(100vh-4rem)] w-full">
         <div className="fixed top-16 left-0 bottom-0 z-30">
-          <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
+          <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} onFiltersSubmit={handleFiltersSubmit} />
         </div>
         <main className={`flex-1 transition-all duration-300 ${isCollapsed ? 'ml-12' : 'ml-64'}`}>
           <div className="p-6 bg-gray-50 min-h-full flex items-center justify-center">
@@ -62,11 +80,11 @@ const Marketplace = () => {
   return (
     <div className="flex min-h-[calc(100vh-4rem)] w-full">
       <div className="fixed top-16 left-0 bottom-0 z-30">
-        <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
+        <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} onFiltersSubmit={handleFiltersSubmit} />
       </div>
       <main className={`flex-1 transition-all duration-300 ${isCollapsed ? 'ml-12' : 'ml-64'}`}>
         <div className="p-6 bg-gray-50 min-h-full">
-          {listings.length === 0 ? (
+          {filteredListings.length === 0 ? (
             <div className="flex items-center justify-center h-full">
               <p className="text-gray-600">No listings found</p>
             </div>
@@ -97,15 +115,12 @@ const Marketplace = () => {
                 <div className="h-[26px]"></div> {/* Space for condition badge */}
               </div>
 
-              {listings.map((listing) => {
-                console.log('Rendering listing:', listing.id);
-                return (
-                  <BookCard 
-                    key={listing.id} 
-                    {...listing} 
-                  />
-                );
-              })}
+              {filteredListings.map((listing) => (
+                <BookCard 
+                  key={listing.id} 
+                  {...listing} 
+                />
+              ))}
             </div>
           )}
         </div>

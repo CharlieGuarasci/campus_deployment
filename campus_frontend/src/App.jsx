@@ -11,6 +11,7 @@ import Messages from "./pages/Messages";
 import Board from "./pages/Board";
 import PostListing from "./pages/PostListing";
 import "./index.css";
+import { SearchProvider } from './context/SearchContext';
 
 // Wrapper component to handle conditional footer rendering
 const AppContent = () => {
@@ -41,7 +42,11 @@ const AppContent = () => {
 function App() {
   return (
     <Router>
-      <AppContent />
+      <SearchProvider>
+        <div className="min-h-screen bg-gray-100">
+          <AppContent />
+        </div>
+      </SearchProvider>
     </Router>
   );
 }

@@ -161,6 +161,47 @@ const ListingDetail = () => {
                 <p className="text-sm sm:text-base text-gray-600 whitespace-pre-line">{listing.description}</p>
               </div>
 
+              {/* Seller Profile */}
+              <div className="mb-6 sm:mb-8 bg-gray-50 rounded-lg p-4">
+                <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3">About the Seller</h3>
+                <div className="flex items-start space-x-4">
+                  <div className="flex-shrink-0">
+                    <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
+                      {listing.seller_avatar ? (
+                        <img
+                          src={`http://localhost:8000${listing.seller_avatar}`}
+                          alt={listing.seller_name}
+                          className="h-12 w-12 rounded-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-lg font-medium text-gray-600">
+                          {listing.seller_name ? listing.seller_name[0].toUpperCase() : 'S'}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-base font-medium text-gray-900">{listing.seller_name || 'Anonymous'}</h4>
+                    {listing.seller_program && (
+                      <p className="text-sm text-gray-600 mt-1">
+                        {listing.seller_program} • {listing.seller_year_of_study}
+                      </p>
+                    )}
+                    {listing.seller_bio && (
+                      <p className="text-sm text-gray-600 mt-2">{listing.seller_bio}</p>
+                    )}
+                    <div className="mt-3 flex items-center space-x-4">
+                      <div className="text-sm text-gray-600">
+                        <span className="font-medium">{listing.seller_listing_count || 0}</span> listings
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        Member since {new Date(listing.seller_joined_date).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Action Buttons */}
               <div className="space-y-3 sm:space-y-4 sticky bottom-0 bg-white pt-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:static">
                 <button
