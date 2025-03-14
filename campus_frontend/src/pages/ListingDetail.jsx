@@ -55,6 +55,7 @@ const ListingDetail = () => {
   const imageUrl = listing.image ? `http://localhost:8000/media/${listing.image.split('/media/')[1]}` : "/placeholder.png";
 
   const getConditionBadgeColor = (condition) => {
+    if (!condition) return "bg-gray-100 text-gray-800"; 
     switch (condition.toUpperCase()) {
       case 'GOOD': return 'bg-green-100 text-green-800';
       case 'FAIR': return 'bg-yellow-100 text-yellow-800';

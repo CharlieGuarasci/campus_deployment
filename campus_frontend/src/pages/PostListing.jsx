@@ -89,71 +89,101 @@ const PostListing = () => {
     setError(null);
 
     try {
-      const userData = localStorage.getItem('user');
-      if (!userData) {
-        // Save form data before redirecting
-        sessionStorage.setItem('pendingListing', JSON.stringify(formData));
-        navigate('/signin?returnTo=/post-listing');
-        return;
+        const userData = localStorage.getItem('user');
+        if (!userData) {
+            sessionStorage.setItem('pendingListing', JSON.stringify(formData));
+            navigate('/signin?returnTo=/post-listing');
+            return;
+        }
+
+        let endpoint = "/api/listings/";
+        switch (formData.category) {
+            case "BOOKS":
+                endpoint = "/api/listings/books/";
+                break;
+            case "SUBLETS":
+                endpoint = "/api/listings/sublets/";
+                break;
+            case "ROOMMATES":
+                endpoint = "/api/listings/roommates/";
+                break;
+            case "RIDESHARE":
+                endpoint = "/api/listings/rideshare/";
+                break;
+            case "EVENTS":
+            case "OTHER":
+                endpoint = "/api/listings/events/";
+                break;
+            default:
+                break;
+        }
+
+        // Fix gender before submitting
+        if (!formData.price || isNaN(formData.price)) {
+          formData.price = "0";  // Default to 0 for categories without a price
       }
-
-      let endpoint = "/api/listings/"; // Default for generic listings
-      switch (formData.category) {
-        case "BOOKS":
-          endpoint = "/api/listings/books/";
-          break;
-        case "SUBLETS":
-          endpoint = "/api/listings/sublets/";
-          break;
-        case "ROOMMATES":
-          endpoint = "/api/listings/roommates/";
-          break;
-        case "RIDESHARE":
-          endpoint = "/api/listings/rideshare/";
-          break;
-        case "EVENTS":
-        case "OTHER":
-          endpoint = "/api/listings/events/";
-          break;
-        default:
-          break;
-      }
-
-      const formatCondition = (condition) => {
-        if (!condition) return "Fair"; // Default if empty
-        return condition.charAt(0).toUpperCase() + condition.slice(1).toLowerCase(); // Convert "GOOD" → "Good"
-      };
-
-      // Create FormData object for multipart/form-data
-      const submitData = new FormData();
-      Object.keys(formData).forEach(key => {
-        if (formData[key] !== null) {
-          // Fix condition field before appending
-          if (key === "condition") {
-            submitData.append(key, formatCondition(formData[key]));
+         if (formData.category === "SUBLETS") {
+        formData.rooms = formData.num_roommates;  // Map frontend field to backend
+        delete formData.num_roommates;  // Remove old key to avoid conflicts
+    }
+      
+      // Ensure gender is in the correct format
+        const genderMap = {
+          "Male": "male",
+          "Female": "female",
+          "Non-binary": "non_binary",
+          "Other": "other",
+          "Prefer not to say": "prefer_not_to_say"
+          };
+          if (formData.gender && genderMap[formData.gender]) {
+              formData.gender = genderMap[formData.gender];
           } else {
-            submitData.append(key, formData[key]);
+              formData.gender = "other";  // Default fallback
           }
-        }
-      });
 
-      const response = await fetch(`http://127.0.0.1:8000${endpoint}`, {
-        method: "POST",
-        body: submitData,
-        });
-    
-      if (!response.ok) {
-        throw new Error("Failed to create listing");
+        // Fix condition field
+        const formatCondition = (condition) => {
+            const validConditions = ["Poor", "Fair", "Good"];
+            return validConditions.includes(condition) ? condition : "Fair";
+        };
+
+        // Ensure year_of_study is valid
+        if (!formData.year_of_study) {
+            formData.year_of_study = "First Year";
         }
-    
+        
+
+        // Create FormData for multipart submission
+        const submitData = new FormData();
+        Object.keys(formData).forEach(key => {
+            if (formData[key] !== null && formData[key] !== undefined) {
+                submitData.append(key, key === "condition" ? formatCondition(formData[key]) : formData[key]);
+            }
+        });
+
+        // Debugging Output
+        console.log("📡 Submitting Form Data:", formData);
+        console.log("📡 FormData Entries:", Object.fromEntries(submitData));
+
+        const response = await fetch(`http://127.0.0.1:8000${endpoint}`, {
+            method: "POST",
+            body: submitData,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json(); // Get error details
+            console.error("🚨 Server Validation Error:", errorData);
+            throw new Error(errorData.detail || "Failed to create listing");
+        }
+
         navigate("/");
     } catch (err) {
-      console.error("Error creating listing:", err);
-      setError(err.message || "Failed to create listing");
+        console.error("❌ Error creating listing:", err);
+        setError(err.message || "Failed to create listing");
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
 
   return (
     <div className="min-h-screen bg-gray-50">
