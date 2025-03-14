@@ -76,11 +76,18 @@ def create_user(request):
   
     data = request.data.copy()
 
+    # Validate email domain
+    email = data.get("email", "")
+    if not email.endswith("@queensu.ca"):
+        return Response(
+            {"error": "Only @queensu.ca email addresses are allowed"}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
     if AppUser.objects.filter(email=data.get("email")).exists():
         return Response({"error": "Email already registered"}, status=status.HTTP_400_BAD_REQUEST)
     
     data["password"] = make_password(data["password"])
-
     data["username"] = data.get("name", "")
 
     serializer = UserSerializer(data=data)
