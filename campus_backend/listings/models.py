@@ -2,10 +2,26 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class Listing(models.Model):
+    CATEGORY_CHOICES = [
+        ('BOOKS', 'Books'),
+        ('SUBLETS', 'Sublets'),
+        ('ROOMMATES', 'Roommates'),
+        ('RIDESHARE', 'Rideshare and Travel'),
+        ('EVENTS', 'Events'),
+        ('OTHER', 'Other'),
+    ]
+    
+    CONDITION_CHOICES = [
+        ('Poor', 'Poor'),
+        ('Fair', 'Fair'),
+        ('Good', 'Good'),
+    ]
+
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='OTHER')
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-   
+    condition = models.CharField(max_length=255, choices=CONDITION_CHOICES, blank=True, null=True)
     seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name="listings", null=True, blank=True)
     image = models.ImageField(upload_to='listing_images/', blank=True, null=True)   # New field for book images
     created_at = models.DateTimeField(auto_now_add=True)
@@ -16,16 +32,9 @@ class Listing(models.Model):
 
 
 class BookListing(Listing):
-    CONDITION_CHOICES = [
-        ('Poor', 'Poor'),
-        ('Fair', 'Fair'),
-        ('Good', 'Good'),
-    ]
-
     author = models.CharField(max_length=255)
     edition = models.CharField(max_length=50, blank=True, null=True)
     course_code = models.CharField(max_length=255, blank=True, null=True)
-    condition = models.CharField(max_length=255, choices=CONDITION_CHOICES, default='Fair')
     pickup_location = models.CharField(max_length=255, blank = False, null = False)
 
 class SubletListing(Listing):
@@ -83,10 +92,4 @@ class RideShare(Listing):
     date_of_travel = models.DateTimeField(null=True, blank=True)
 
 class EventsAndOther(Listing):
-    CONDITION_CHOICES = [
-        ('Poor', 'Poor'),
-        ('Fair', 'Fair'),
-        ('Good', 'Good'),
-    ]
-     
-    condition = models.CharField(max_length=255, choices=CONDITION_CHOICES, default='Fair', blank=True, null=True)
+    pass

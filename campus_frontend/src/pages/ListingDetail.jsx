@@ -9,6 +9,25 @@ const ListingDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Category color and label mappings
+  const categoryColors = {
+    'BOOKS': "bg-blue-100 text-blue-800",
+    'SUBLETS': "bg-indigo-100 text-indigo-800",
+    'ROOMMATES': "bg-purple-100 text-purple-800",
+    'RIDESHARE': "bg-cyan-100 text-cyan-800",
+    'EVENTS': "bg-pink-100 text-pink-800",
+    'OTHER': "bg-gray-100 text-gray-800",
+  };
+
+  const categoryLabels = {
+    'BOOKS': "Books",
+    'SUBLETS': "Sublets",
+    'ROOMMATES': "Roommates",
+    'RIDESHARE': "Rideshare and Travel",
+    'EVENTS': "Events",
+    'OTHER': "Other",
+  };
+
   useEffect(() => {
     const fetchListing = async () => {
       try {
@@ -70,7 +89,7 @@ const ListingDetail = () => {
         {/* Back button */}
         <button
           onClick={() => navigate(-1)}
-          className="mb-4 sm:mb-6 flex items-center text-white hover:text-white transition-colors"
+          className="mb-4 sm:mb-6 flex items-center text-gray-600 hover:text-gray-900 transition-colors"
         >
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -95,23 +114,38 @@ const ListingDetail = () => {
             <div className="p-4 sm:p-8">
               {/* Title and Course Section */}
               <div className="mb-4 sm:mb-6">
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {/* Category Badge */}
+                  {listing.category && (
+                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${categoryColors[listing.category] || "bg-gray-200 text-gray-700"}`}>
+                      {categoryLabels[listing.category] || listing.category}
+                    </span>
+                  )}
+                  {/* Condition Badge - Only show if condition exists and is not empty/null */}
+                  {listing.condition && listing.condition !== '' && listing.condition !== null && (
+                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getConditionBadgeColor(listing.condition)}`}>
+                      {listing.condition}
+                    </span>
+                  )}
+                </div>
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 mb-2">
                   <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">${listing.price}</h2>
-                  <span className={`self-start sm:self-auto px-3 sm:px-4 py-1 rounded-full text-sm font-semibold ${getConditionBadgeColor(listing.condition)}`}>
-                    {listing.condition}
-                  </span>
                 </div>
                 <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">{listing.title}</h1>
-                <p className="text-base sm:text-lg text-emerald-600 font-medium">{listing.course_code}</p>
+                {listing.course_code && (
+                  <p className="text-base sm:text-lg text-emerald-600 font-medium">{listing.course_code}</p>
+                )}
               </div>
 
               {/* Book Details */}
               <div className="space-y-4 mb-6 sm:mb-8">
                 <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                  <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
-                    <p className="text-xs sm:text-sm text-gray-500">Author</p>
-                    <p className="text-sm sm:text-base text-gray-900 font-medium">{listing.author}</p>
-                  </div>
+                  {listing.author && (
+                    <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
+                      <p className="text-xs sm:text-sm text-gray-500">Author</p>
+                      <p className="text-sm sm:text-base text-gray-900 font-medium">{listing.author}</p>
+                    </div>
+                  )}
                   {listing.edition && (
                     <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
                       <p className="text-xs sm:text-sm text-gray-500">Edition</p>
@@ -131,13 +165,11 @@ const ListingDetail = () => {
               <div className="space-y-3 sm:space-y-4 sticky bottom-0 bg-white pt-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:static">
                 <button
                   onClick={() => {
-                    // Check if user is logged in
                     const userData = localStorage.getItem('user');
                     if (!userData) {
                       navigate('/signin?returnTo=' + encodeURIComponent(window.location.pathname));
                       return;
                     }
-                    // Navigate to messages with seller info
                     navigate(`/messages?seller=${listing.seller_id}&listing=${listing.id}`);
                   }}
                   className="w-full py-3 px-4 bg-black text-white rounded-lg hover:bg-grey-500 transition-colors flex items-center justify-center text-base sm:text-lg"
@@ -149,7 +181,7 @@ const ListingDetail = () => {
                 </button>
                 
                 <button
-                  onClick={() => window.open(`mailto:?subject=Check out this textbook: ${listing.title}&body=I found this textbook on Campus Marketplace: ${window.location.href}`)}
+                  onClick={() => window.open(`mailto:?subject=Check out this listing: ${listing.title}&body=I found this item on Campus Marketplace: ${window.location.href}`)}
                   className="w-full py-3 px-4 bg-black text-white rounded-lg hover:bg-grey-500 transition-colors flex items-center justify-center text-base sm:text-lg"
                 >
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

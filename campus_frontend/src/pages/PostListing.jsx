@@ -121,7 +121,7 @@ const PostListing = () => {
         // Fix gender before submitting
         if (!formData.price || isNaN(formData.price)) {
           formData.price = "0";  // Default to 0 for categories without a price
-      }
+        }
          if (formData.category === "SUBLETS") {
         formData.rooms = formData.num_roommates;  // Map frontend field to backend
         delete formData.num_roommates;  // Remove old key to avoid conflicts
@@ -155,14 +155,28 @@ const PostListing = () => {
 
         // Create FormData for multipart submission
         const submitData = new FormData();
+
+        // Ensure category is included first
+        submitData.append('category', formData.category);
+
+        // Add all other form fields
         Object.keys(formData).forEach(key => {
-            if (formData[key] !== null && formData[key] !== undefined) {
-                submitData.append(key, key === "condition" ? formatCondition(formData[key]) : formData[key]);
+          if (formData[key] !== null && formData[key] !== undefined && formData[key] !== '') {
+            if (key === 'condition') {
+              submitData.append(key, formatCondition(formData[key]));
+            } else if (key === 'image' && formData[key] instanceof File) {
+              submitData.append(key, formData[key]);
+            } else {
+              submitData.append(key, formData[key]);
             }
+          }
         });
 
         // Debugging Output
-        console.log("📡 Submitting Form Data:", formData);
+        console.log("📡 Submitting Form Data:", {
+          ...formData,
+          category: formData.category // Explicitly log category
+        });
         console.log("📡 FormData Entries:", Object.fromEntries(submitData));
 
         const response = await fetch(`http://127.0.0.1:8000${endpoint}`, {
