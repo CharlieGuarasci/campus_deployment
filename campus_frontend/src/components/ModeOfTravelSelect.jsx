@@ -16,9 +16,11 @@ export function ModeOfTravelSelect({ value, onValueChange }) {
       </SelectTrigger>
       <SelectContent className="!bg-white !text-gray-900">
         <SelectGroup>
-          <SelectItem value="AUTOMOBILE" className="!bg-white hover:!bg-gray-50">Automobile</SelectItem>
           <SelectItem value="TRAIN" className="!bg-white hover:!bg-gray-50">Train</SelectItem>
           <SelectItem value="PLANE" className="!bg-white hover:!bg-gray-50">Plane</SelectItem>
+          <SelectItem value="AUTOMOBILE" className="!bg-white hover:!bg-gray-50">Automobile</SelectItem>
+          <SelectItem value="BUS" className="!bg-white hover:!bg-gray-50">Bus</SelectItem>
+          <SelectItem value="OTHER" className="!bg-white hover:!bg-gray-50">Other</SelectItem>
         </SelectGroup>
       </SelectContent>
     </Select>

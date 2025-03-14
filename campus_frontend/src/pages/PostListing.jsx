@@ -15,7 +15,7 @@ const CATEGORIES = {
   TICKETS: 'Tickets',
   SUBLETS: 'Sublets',
   ROOMMATES: 'Roommates',
-  RIDESHARE: 'Rideshare',
+  RIDESHARE: 'Rideshare and Travel',
   OTHER: 'Other'
 };
 
@@ -97,19 +97,59 @@ const PostListing = () => {
         return;
       }
 
+      let endpoint = "/api/listings/"; // Default for generic listings
+      switch (formData.category) {
+        case "BOOKS":
+          endpoint = "/api/listings/books/";
+          break;
+        case "SUBLETS":
+          endpoint = "/api/listings/sublets/";
+          break;
+        case "ROOMMATES":
+          endpoint = "/api/listings/roommates/";
+          break;
+        case "RIDESHARE":
+          endpoint = "/api/listings/rideshare/";
+          break;
+        case "EVENTS":
+        case "OTHER":
+          endpoint = "/api/listings/events/";
+          break;
+        default:
+          break;
+      }
+
+      const formatCondition = (condition) => {
+        if (!condition) return "Fair"; // Default if empty
+        return condition.charAt(0).toUpperCase() + condition.slice(1).toLowerCase(); // Convert "GOOD" → "Good"
+      };
+
       // Create FormData object for multipart/form-data
       const submitData = new FormData();
       Object.keys(formData).forEach(key => {
         if (formData[key] !== null) {
-          submitData.append(key, formData[key]);
+          // Fix condition field before appending
+          if (key === "condition") {
+            submitData.append(key, formatCondition(formData[key]));
+          } else {
+            submitData.append(key, formData[key]);
+          }
         }
       });
 
-      const response = await listingsService.createListing(submitData);
-      navigate('/marketplace');
+      const response = await fetch(`http://127.0.0.1:8000${endpoint}`, {
+        method: "POST",
+        body: submitData,
+        });
+    
+      if (!response.ok) {
+        throw new Error("Failed to create listing");
+        }
+    
+        navigate("/");
     } catch (err) {
-      console.error('Error creating listing:', err);
-      setError(err.message || 'Failed to create listing');
+      console.error("Error creating listing:", err);
+      setError(err.message || "Failed to create listing");
     } finally {
       setLoading(false);
     }

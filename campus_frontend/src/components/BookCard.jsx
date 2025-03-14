@@ -38,18 +38,24 @@ const BookCard = ({ id, title, course_code, price, condition, image, author, edi
 
       {/* Title and Author */}
       <div className="mb-2">
-        <p className="text-sm text-gray-600">{title}</p>
+        <p className="text-sm text-gray-600">{title || "Untitled"}</p>
         {author && <p className="text-sm text-gray-500">{author}</p>}
         {edition && <p className="text-xs text-gray-400">Edition: {edition}</p>}
       </div>
 
       {/* Price */}
-      <p className="text-2xl font-bold text-emerald-600 mb-2">${price}</p>
+      <p className="text-2xl font-bold text-emerald-600 mb-2">${price || "0.00"}</p>
 
-      {/* Condition Badge */}
-      <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${conditionColors[condition.toUpperCase()]}`}>
-        {condition}
-      </span>
+      {/* Condition Badge - Check if condition exists before calling .toUpperCase() */}
+      {condition ? (
+        <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${conditionColors[condition.toUpperCase()] || "bg-gray-200 text-gray-700"}`}>
+          {condition}
+        </span>
+      ) : (
+        <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-700">
+          Unknown
+        </span>
+      )}
     </div>
   );
 };
