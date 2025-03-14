@@ -14,10 +14,24 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
+  const [emailError, setEmailError] = useState("");
+
+  const validateEmail = (email) => {
+    if (!email.endsWith("@queensu.ca")) {
+      setEmailError("Only @queensu.ca email addresses are allowed");
+      return false;
+    }
+    setEmailError("");
+    return true;
+  };
 
   const handleRegister = async (e) => {
     e.preventDefault();
     
+    if (!validateEmail(email)) {
+      return;
+    }
+
     console.log("Password:", password);
     console.log("Confirm Password:", confirmPassword);
     if (password !== confirmPassword) {
@@ -44,7 +58,7 @@ const Register = () => {
       window.dispatchEvent(new Event('authChange'));
       navigate("/signin"); // Redirect to sign-in after successful registration
     } catch (err) {
-      setError("Registration failed. Try a different email.");
+      setError(err.response?.data?.error || "Registration failed. Please try again.");
     }
   };
 
@@ -74,14 +88,20 @@ const Register = () => {
             />
           </div>
 
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          <div>
+            <input
+              type="email"
+              placeholder="Queen's Email (@queensu.ca)"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                validateEmail(e.target.value);
+              }}
+              required
+              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            {emailError && <p className="text-red-500 text-sm mt-1">{emailError}</p>}
+          </div>
 
           <div className="relative">
             <input
