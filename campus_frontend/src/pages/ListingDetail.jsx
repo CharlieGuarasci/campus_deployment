@@ -9,6 +9,11 @@ const ListingDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Scroll to top and center when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Category color and label mappings
   const categoryColors = {
     'BOOKS': "bg-blue-100 text-blue-800",
@@ -45,17 +50,15 @@ const ListingDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
-        </div>
+      <div className="min-h-screen w-full bg-gray-50 flex items-center justify-center fixed top-0 left-0">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen w-full bg-gray-50 flex items-center justify-center fixed top-0 left-0">
         <div className="flex flex-col items-center">
           <p className="text-red-600 mb-4">{error}</p>
           <button
@@ -84,10 +87,10 @@ const ListingDetail = () => {
   };
 
   return (
-    <div className="min-h-screen min-w-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+    <div className="min-h-screen w-full bg-gray-50 flex flex-col items-center overflow-y-auto fixed top-0 left-0 pt-16">
+      <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Back button */}
-        <button
+        <div
           onClick={() => navigate(-1)}
           className="mb-4 sm:mb-6 flex items-center text-gray-600 hover:text-gray-900 transition-colors"
         >
@@ -95,7 +98,7 @@ const ListingDetail = () => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
           Back to Listings
-        </button>
+        </div>
 
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-2">
@@ -204,7 +207,7 @@ const ListingDetail = () => {
 
               {/* Action Buttons */}
               <div className="space-y-3 sm:space-y-4 sticky bottom-0 bg-white pt-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:static">
-                <button
+                <div
                   onClick={() => {
                     const userData = localStorage.getItem('user');
                     if (!userData) {
@@ -219,9 +222,9 @@ const ListingDetail = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
                   Contact Seller
-                </button>
+                </div>
                 
-                <button
+                <div
                   onClick={() => window.open(`mailto:?subject=Check out this listing: ${listing.title}&body=I found this item on Campus Marketplace: ${window.location.href}`)}
                   className="w-full py-3 px-4 bg-black text-white rounded-lg hover:bg-grey-500 transition-colors flex items-center justify-center text-base sm:text-lg"
                 >
@@ -229,7 +232,7 @@ const ListingDetail = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                   </svg>
                   Share Listing
-                </button>
+                </div>
               </div>
             </div>
           </div>
