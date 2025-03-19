@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Checkbox } from "../components/ui/checkbox";
 import { useState, useEffect } from "react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const CATEGORIES = [
   {
@@ -187,24 +188,33 @@ const Sidebar = ({ isCollapsed, setIsCollapsed, onFiltersSubmit }) => {
                                 className={`flex flex-row items-center ${isCollapsed ? 'justify-center' : 'space-x-2'} space-y-0`}
                               >
                                 {isCollapsed ? (
-                                  <div 
-                                    onClick={() => {
-                                      if (isCollapsed) {
-                                        handleCollapsedCategoryClick(item.id, field.value);
-                                      } else {
-                                        const isCurrentlyChecked = field.value?.includes(item.id);
-                                        const newValue = isCurrentlyChecked
-                                          ? field.value?.filter(value => value !== item.id)
-                                          : [...(field.value || []), item.id];
-                                        field.onChange(newValue);
-                                      }
-                                    }}
-                                    className={`p-1.5 rounded-md transition cursor-pointer hover:bg-gray-100 ${
-                                      field.value?.includes(item.id) ? 'text-black' : 'text-gray-500'
-                                    }`}
-                                  >
-                                    {field.value?.includes(item.id) ? item.icon.solid : item.icon.outline}
-                                  </div>
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <div 
+                                          onClick={() => {
+                                            if (isCollapsed) {
+                                              handleCollapsedCategoryClick(item.id, field.value);
+                                            } else {
+                                              const isCurrentlyChecked = field.value?.includes(item.id);
+                                              const newValue = isCurrentlyChecked
+                                                ? field.value?.filter(value => value !== item.id)
+                                                : [...(field.value || []), item.id];
+                                              field.onChange(newValue);
+                                            }
+                                          }}
+                                          className={`p-1.5 rounded-md transition cursor-pointer hover:bg-gray-100 ${
+                                            field.value?.includes(item.id) ? 'text-black' : 'text-gray-500'
+                                          }`}
+                                        >
+                                          {field.value?.includes(item.id) ? item.icon.solid : item.icon.outline}
+                                        </div>
+                                      </TooltipTrigger>
+                                      <TooltipContent side="right">
+                                        {item.label}
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
                                 ) : (
                                   <>
                                     <FormControl>
