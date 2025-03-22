@@ -79,6 +79,12 @@ const SignIn = () => {
                 onClick={() => setShowPassword(!showPassword)}
               />
             </div>
+
+            <div className="flex justify-end">
+              <a href="/forgot-password" className="text-sm text-blue-500 hover:text-blue-700">
+                Forgot password?
+              </a>
+            </div>
     
             <button 
               type="submit" 
