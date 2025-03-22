@@ -10,6 +10,9 @@ import ListingDetail from "./pages/ListingDetail";
 import Messages from "./pages/Messages";
 import Board from "./pages/Board";
 import PostListing from "./pages/PostListing";
+import VerifyEmail from "./pages/VerifyEmail";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import "./index.css";
 import { SearchProvider } from './context/SearchContext';
 
@@ -32,6 +35,9 @@ const AppContent = () => {
           <Route path="/messages" element={<Messages />} />
           <Route path="/board" element={<Board />} />
           <Route path="/post-listing" element={<PostListing />} />
+          <Route path="/verify-email/:token" element={<VerifyEmail />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
         </Routes>
       </div>
       {showFooter && <Footer />}
