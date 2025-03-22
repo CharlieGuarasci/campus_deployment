@@ -20,7 +20,7 @@ const Welcome = () => {
 
     // Navigate to profile after fade out (3 seconds total)
     const navigationTimer = setTimeout(() => {
-      navigate('/profile');
+      navigate('/');
     }, 2500);
 
     return () => {
