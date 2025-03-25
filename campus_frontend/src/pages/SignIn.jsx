@@ -10,11 +10,23 @@ const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
 
+  const handleVerifyEmail = async () => {
+    try {
+      const response = await axios.post("http://localhost:8000/appuser/verify-email-by-address/", {
+        email: email
+      });
+      alert("Email verified successfully! You can now sign in.");
+      setError("");
+    } catch (err) {
+      setError("Failed to verify email. Please try again.");
+    }
+  };
+
   const handleSignIn = async (e) => {
     e.preventDefault();
 
     try {
-        const response = await axios.post("http://localhost:8000/appuser/signin/", {
+        const response = await axios.post("http://localhost:8000/appuser/sign-in/", {
             email,
             password,
         });
@@ -39,7 +51,8 @@ const SignIn = () => {
         }
     } catch (err) {
         console.error("❌ Sign-in error:", err);
-        setError("Invalid email or password. Please try again.");
+        // Use the error message from the backend if available
+        setError(err.response?.data?.error || "Invalid email or password. Please try again.");
     }
 };
 
@@ -91,6 +104,15 @@ const SignIn = () => {
               className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors"
             >
               Sign In
+            </button>
+
+            {/* Temporary button for email verification */}
+            <button 
+              type="button"
+              onClick={handleVerifyEmail}
+              className="w-full bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-700 transition-colors mt-2"
+            >
+              Verify Email (Temporary)
             </button>
           </form>
     

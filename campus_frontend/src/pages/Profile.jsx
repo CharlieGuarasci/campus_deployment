@@ -77,7 +77,7 @@ const Profile = () => {
       }
       
       await axios.post(
-        "http://localhost:8000/appuser/edit_profile/",
+        "http://localhost:8000/appuser/edit-profile/",
         {
           user_id: user.id,
           name: formData.name || user.name,

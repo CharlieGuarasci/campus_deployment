@@ -40,7 +40,7 @@ const Register = () => {
     }
 
     try {
-      const response = await axios.post("http://127.0.0.1:8000/appuser/register/", 
+      const response = await axios.post("http://127.0.0.1:8000/appuser/create-user/", 
         { 
           name: `${firstName} ${lastName}`,
           email, 
