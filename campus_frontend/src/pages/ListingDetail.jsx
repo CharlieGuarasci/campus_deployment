@@ -87,8 +87,8 @@ const ListingDetail = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gray-50 flex flex-col items-center overflow-y-auto fixed top-0 left-0 pt-16">
-      <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+    <div className="min-h-screen bg-gray-50 pb-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back button */}
         <div
           onClick={() => navigate(-1)}

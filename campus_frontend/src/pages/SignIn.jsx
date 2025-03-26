@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import ShowHideButton from "../components/ShowHideButton";
+import { API_URL } from "../config";
 
 const SignIn = () => {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ const SignIn = () => {
 
   const handleVerifyEmail = async () => {
     try {
-      const response = await axios.post("http://localhost:8000/appuser/verify-email-by-address/", {
+      const response = await axios.post(`${API_URL}/appuser/verify-email-by-address/`, {
         email: email
       });
       alert("Email verified successfully! You can now sign in.");
@@ -26,56 +27,50 @@ const SignIn = () => {
     e.preventDefault();
 
     try {
-        const response = await axios.post("http://localhost:8000/appuser/sign-in/", {
+        const response = await axios.post(`${API_URL}/appuser/sign-in/`, {
             email,
             password,
         });
 
         if (response.status === 200) {
-            console.log("✅ Sign-in response:", response.data); // Debugging
+            console.log("✅ Sign-in response:", response.data);
 
             if (!response.data.access_token) {
                 console.error("❌ No access token in response!");
                 return;
             }
 
-            // ✅ Store tokens in localStorage
             localStorage.setItem("access_token", response.data.access_token);
             localStorage.setItem("refresh_token", response.data.refresh_token);
             localStorage.setItem("user", JSON.stringify(response.data.user));
 
-            // ✅ Dispatch auth change event
             window.dispatchEvent(new Event("authChange"));
 
             navigate("/welcome");
         }
     } catch (err) {
         console.error("❌ Sign-in error:", err);
-        // Use the error message from the backend if available
         setError(err.response?.data?.error || "Invalid email or password. Please try again.");
     }
 };
 
-
 //styling
   return (
     <div className="flex justify-center min-h-screen w-screen bg-white text-black">
-
-
       {/* Right side - Sign In Form */}
-      <div className="w-1/2 flex items-center justify-center px-8">
-        <div className="w-full max-w-md">
-          <h2 className="text-2xl font-semibold mb-1 text-center">Welcome Back</h2>
-          <p className="text-gray-600 text-center mb-6">Sign in to your Campus account</p>
+      <div className="w-full sm:w-1/2 flex items-center justify-center px-4 sm:px-8">
+        <div className="w-full max-w-md py-4 sm:py-0">
+          <h2 className="text-xl font-semibold mb-1 text-center">Welcome Back</h2>
+          <p className="text-gray-600 text-center mb-4 text-sm">Sign in to your Campus account</p>
     
-          <form onSubmit={handleSignIn} className="space-y-4">
+          <form onSubmit={handleSignIn} className="space-y-3">
             <input
               type="email"
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
     
             <div className="relative">
@@ -85,7 +80,7 @@ const SignIn = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <ShowHideButton
                 showPassword={showPassword}
@@ -94,33 +89,32 @@ const SignIn = () => {
             </div>
 
             <div className="flex justify-end">
-              <a href="/forgot-password" className="text-sm text-blue-500 hover:text-blue-700">
+              <a href="/forgot-password" className="text-xs text-black hover:text-gray-500">
                 Forgot password?
               </a>
             </div>
     
-            <button 
-              type="submit" 
-              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors"
+            <div 
+              onClick={handleSignIn}
+              className="w-full px-3 py-2.5 bg-black text-white rounded-md hover:bg-neutral-800 transition-colors cursor-pointer text-sm font-medium"
             >
               Sign In
-            </button>
+            </div>
 
             {/* Temporary button for email verification */}
-            <button 
-              type="button"
+            <div 
               onClick={handleVerifyEmail}
-              className="w-full bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-700 transition-colors mt-2"
+              className="w-full px-3 py-2.5 bg-black text-white rounded-md hover:bg-neutral-800 transition-colors cursor-pointer text-sm font-medium"
             >
               Verify Email (Temporary)
-            </button>
+            </div>
           </form>
     
-          <p className="text-center text-gray-600 mt-6">
+          <p className="text-center text-gray-600 mt-4 text-xs">
             New to Campus? <a href="/register" className="text-blue-500">Create an account</a>
           </p>
     
-          {error && <p className="text-red-500 text-sm text-center mt-3">{error}</p>}
+          {error && <p className="text-red-500 text-xs text-center mt-2">{error}</p>}
         </div>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { listingsService } from '../services/listingsService';
+import { WS_URL, API_URL } from '../config';
 
 const Messages = () => {
   const [searchParams] = useSearchParams();
@@ -97,8 +98,8 @@ const Messages = () => {
     }
   
     // Create a new WebSocket connection
-    const token = localStorage.getItem("access_token"); // Assuming token is stored in localStorage
-    const ws = new WebSocket(`ws://localhost:8000/ws/chat/${selectedConversation}/?token=${token}`);
+    const token = localStorage.getItem("access_token");
+    const ws = new WebSocket(`${WS_URL}/ws/chat/${selectedConversation}/?token=${token}`);
     socketRef.current = ws;
   
     ws.onopen = () => {console.log("✅ Connected to WebSocket");};
@@ -169,20 +170,135 @@ const Messages = () => {
       (conv) => conv.id === selectedConversation
     );
     
+    if (!currentConversation && conversations.length === 0) {
+      return (
+        <div className="flex h-[calc(100vh-64px)] items-center justify-center bg-gray-50">
+          <div className="text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 mx-auto mb-4 text-gray-400">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 4.483 0 0 1-.923 1.785A5.969 5.969 0 0 0 6 21c1.282 0 2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337Z" />
+            </svg>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No conversations yet</h3>
+            <div
+              onClick={() => navigate('/profile')}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none transition-colors"
+            >
+              Start Conversation
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     if (!currentConversation) {
-      return <div className="flex h-full items-center justify-center">Select a conversation to start messaging.</div>;
+      return (
+        <div className="flex h-[calc(100vh-64px)] bg-gray-50">
+          {/* Left Panel - Conversations */}
+          <div className="w-[60px] sm:w-[220px] bg-white border-r border-gray-200 relative">
+            <div className="p-4 border-b border-gray-200 hidden sm:block">
+              <h2 className="text-xl font-medium text-gray-900">Messages</h2>
+            </div>
+            <div className="overflow-y-auto h-[calc(100vh-112px)] pb-16 sm:pb-0">
+              {/* New Conversation Icon */}
+              <div
+                onClick={() => navigate('/')}
+                className="border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
+              >
+                <div className="p-4">
+                  <div className="flex items-start justify-center">
+                    <div className="flex-shrink-0">
+                      <div className="h-12 w-12 sm:h-8 sm:w-8 rounded-full bg-black flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 sm:w-4 sm:h-4 text-white">
+                          <path fillRule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="ml-3 min-w-0 flex-1 hidden sm:block">
+                      <div className="flex items-baseline justify-between">
+                        <p className="text-sm font-medium text-gray-900">New Conversation</p>
+                      </div>
+                      <p className="text-sm text-gray-500 truncate mt-1">
+                        Browse listings to start chatting
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {conversations.map((conversation, index) => (
+                <div
+                  key={`${conversation.id}-${index}`}
+                  onClick={() => setSelectedConversation(conversation.id)}
+                  className={`border-b border-gray-200 hover:bg-gray-50 cursor-pointer ${
+                    selectedConversation === conversation.id ? 'bg-gray-50' : ''
+                  }`}
+                >
+                  <div className="p-4">
+                    <div className="flex items-start justify-center">
+                      <div className="flex-shrink-0">
+                        <div className="h-12 w-12 sm:h-8 sm:w-8 rounded-full bg-gray-200 flex items-center justify-center">
+                          <span className="text-lg sm:text-sm font-medium text-gray-600">
+                            {conversation.user.name[0]}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="ml-3 min-w-0 flex-1 hidden sm:block">
+                        <div className="flex items-baseline justify-between">
+                          <p className="text-sm font-medium text-gray-900 truncate">{conversation.user.name}</p>
+                          <p className="text-xs text-gray-500 ml-2 flex-shrink-0">{conversation.user.timestamp}</p>
+                        </div>
+                        <p className="text-sm text-gray-500 truncate mt-1">
+                          {conversation.user.lastMessage}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex-1 items-center justify-center hidden sm:flex">
+            <div className="text-center text-gray-500">
+              <p>Select a conversation to start messaging</p>
+            </div>
+          </div>
+        </div>
+      );
     }
 
   return (
     <div className="flex h-[calc(100vh-64px)] bg-gray-50">
       {/* Left Panel - Conversations */}
-      <div className="w-[220px] bg-white border-r border-gray-200 relative">
-        <div className="p-4 border-b border-gray-200">
+      <div className="w-[60px] sm:w-[220px] bg-white border-r border-gray-200 relative">
+        <div className="p-4 border-b border-gray-200 hidden sm:block">
           <h2 className="text-xl font-medium text-gray-900">Messages</h2>
         </div>
-        <div className="overflow-y-auto h-[calc(100vh-112px)]">
+        <div className="overflow-y-auto h-[calc(100vh-112px)] pb-16 sm:pb-0">
+          {/* New Conversation Icon */}
+          <div
+            onClick={() => navigate('/')}
+            className="border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
+          >
+            <div className="p-4">
+              <div className="flex items-start justify-center">
+                <div className="flex-shrink-0">
+                  <div className="h-12 w-12 sm:h-8 sm:w-8 rounded-full bg-black flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 sm:w-4 sm:h-4 text-white">
+                      <path fillRule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="ml-3 min-w-0 flex-1 hidden sm:block">
+                  <div className="flex items-baseline justify-between">
+                    <p className="text-sm font-medium text-gray-900">New Conversation</p>
+                  </div>
+                  <p className="text-sm text-gray-500 truncate mt-1">
+                    Browse listings to start chatting
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
           {conversations.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-gray-500 p-4">
+            <div className="flex flex-col items-center justify-center h-full text-gray-500 p-4 hidden sm:flex">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 mb-3">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
               </svg>
@@ -199,15 +315,15 @@ const Messages = () => {
                 }`}
               >
                 <div className="p-4">
-                  <div className="flex items-start">
+                  <div className="flex items-start justify-center">
                     <div className="flex-shrink-0">
-                      <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
-                        <span className="text-sm font-medium text-gray-600">
+                      <div className="h-12 w-12 sm:h-8 sm:w-8 rounded-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-lg sm:text-sm font-medium text-gray-600">
                           {conversation.user.name[0]}
                         </span>
                       </div>
                     </div>
-                    <div className="ml-3 min-w-0 flex-1">
+                    <div className="ml-3 min-w-0 flex-1 hidden sm:block">
                       <div className="flex items-baseline justify-between">
                         <p className="text-sm font-medium text-gray-900 truncate">{conversation.user.name}</p>
                         <p className="text-xs text-gray-500 ml-2 flex-shrink-0">{conversation.user.timestamp}</p>
@@ -284,10 +400,11 @@ const Messages = () => {
                   </div>
                 </div>
               ))}
+              <div ref={messagesEndRef} />
             </div>
 
             {/* Message Input */}
-            <div className="px-4 py-3 border-t border-gray-200 bg-white">
+            <div className="border-t border-gray-200 bg-white px-4 py-3 mb-16 sm:mb-0">
               <form onSubmit={handleSendMessage} className="flex items-center space-x-2">
                 <input
                   type="text"

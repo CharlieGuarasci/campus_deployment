@@ -50,10 +50,10 @@ const Marketplace = () => {
   if (loading) {
     return (
       <div className="flex min-h-[calc(100vh-4rem)] w-full">
-        <div className="fixed top-16 left-0 bottom-0 z-30">
+        <div className="fixed top-16 left-0 bottom-0 z-30 hidden sm:block">
           <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} onFiltersSubmit={handleFiltersSubmit} />
         </div>
-        <main className={`flex-1 transition-all duration-300 ${isCollapsed ? 'ml-12' : 'ml-64'}`}>
+        <main className={`flex-1 transition-all duration-300 sm:${isCollapsed ? 'ml-12' : 'ml-64'} ml-0`}>
           <div className="p-6 bg-gray-50 min-h-full flex items-center justify-center">
             <p className="text-gray-600">Loading listings...</p>
           </div>
@@ -65,10 +65,10 @@ const Marketplace = () => {
   if (error) {
     return (
       <div className="flex min-h-[calc(100vh-4rem)] w-full">
-        <div className="fixed top-16 left-0 bottom-0 z-30">
+        <div className="fixed top-16 left-0 bottom-0 z-30 hidden sm:block">
           <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
         </div>
-        <main className={`flex-1 transition-all duration-300 ${isCollapsed ? 'ml-12' : 'ml-64'}`}>
+        <main className={`flex-1 transition-all duration-300 sm:${isCollapsed ? 'ml-12' : 'ml-64'} ml-0`}>
           <div className="p-6 bg-gray-50 min-h-full flex items-center justify-center">
             <p className="text-red-600">Error: {error}</p>
           </div>
@@ -79,21 +79,21 @@ const Marketplace = () => {
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] w-full">
-      <div className="fixed top-16 left-0 bottom-0 z-30">
+      <div className="fixed top-16 left-0 bottom-0 z-30 hidden sm:block">
         <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} onFiltersSubmit={handleFiltersSubmit} />
       </div>
-      <main className={`flex-1 transition-all duration-300 ${isCollapsed ? 'ml-12' : 'ml-64'}`}>
-        <div className="p-6 bg-gray-50 min-h-full">
+      <main className={`flex-1 transition-all duration-300 sm:${isCollapsed ? 'ml-12' : 'ml-64'} ml-0`}>
+        <div className="p-6 pb-24 sm:pb-6 bg-gray-50 min-h-full">
           {filteredListings.length === 0 ? (
             <div className="flex items-center justify-center h-full">
               <p className="text-gray-600">No listings found</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
+            <div className="grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
               {/* Post Listing Card */}
               <div 
                 onClick={() => navigate('/post-listing')}
-                className="border-2 border-dashed border-gray-300 p-4 rounded-lg shadow-sm hover:shadow-lg hover:border-black transition-all duration-200 bg-white cursor-pointer"
+                className="hidden sm:block border-2 border-dashed border-gray-300 p-4 rounded-lg shadow-sm hover:shadow-lg hover:border-black transition-all duration-200 bg-white cursor-pointer"
               >
                 {/* Image Section */}
                 <div className="aspect-square mb-4 overflow-hidden rounded-lg bg-gray-100 flex items-center justify-center border-2  border-gray-300">

@@ -139,7 +139,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed, onFiltersSubmit }) => {
 
   return (
     <div 
-      className={`h-full border-r bg-white text-black transition-all duration-300 ease-in-out ${
+      className={`h-full border-r bg-white text-black transition-all duration-300 ease-in-out hidden sm:block ${
         isCollapsed ? 'w-12' : 'w-64'
       }`}
     >

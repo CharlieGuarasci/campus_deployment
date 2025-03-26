@@ -1,11 +1,12 @@
 import axios from 'axios';
+import { API_URL } from '../config';
 
-const API_URL = 'http://localhost:8000/api/listings/';
+const API_ENDPOINT = `${API_URL}/api/listings/`;
 
 export const listingsService = {
   getAllListings: async () => {
     try {
-      const response = await axios.get(API_URL);
+      const response = await axios.get(API_ENDPOINT);
       return response.data;
     } catch (error) {
       console.error('Error fetching listings:', error);
@@ -15,7 +16,7 @@ export const listingsService = {
 
   getListing: async (id) => {
     try {
-      const response = await axios.get(`${API_URL}${id}/`);
+      const response = await axios.get(`${API_ENDPOINT}${id}/`);
       return response.data;
     } catch (error) {
       console.error('Error fetching listing:', error);
@@ -25,7 +26,7 @@ export const listingsService = {
 
   createListing: async (listingData, category) => {
     try {
-      let endpoint = API_URL;
+      let endpoint = API_ENDPOINT;
       switch (category) {
         case "BOOKS":
           endpoint += "books/";
@@ -60,7 +61,7 @@ export const listingsService = {
 
   updateListing: async (id, listingData) => {
     try {
-      const response = await axios.put(`${API_URL}${id}/`, listingData);
+      const response = await axios.put(`${API_ENDPOINT}${id}/`, listingData);
       return response.data;
     } catch (error) {
       console.error('Error updating listing:', error);
@@ -70,7 +71,7 @@ export const listingsService = {
 
   deleteListing: async (id) => {
     try {
-      await axios.delete(`${API_URL}${id}/`);
+      await axios.delete(`${API_ENDPOINT}${id}/`);
     } catch (error) {
       console.error('Error deleting listing:', error);
       throw error;
