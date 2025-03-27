@@ -1,37 +1,41 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
+import EditProfileModal from "../components/EditProfileModal";
 
 const Profile = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [user, setUser] = useState(null);
+  const [activeTab, setActiveTab] = useState('about');
   const [isEditing, setIsEditing] = useState(false);
-  const [fadeIn, setFadeIn] = useState(false);
-  const [showOverlay, setShowOverlay] = useState(false);
+  const [coverPhoto, setCoverPhoto] = useState(null);
   const [profileImage, setProfileImage] = useState(null);
-  const fileInputRef = useRef(null);
+  const [savedListings, setSavedListings] = useState([]);
+  const profileInputRef = useRef(null);
+  const coverInputRef = useRef(null);
   const [formData, setFormData] = useState({
     name: "",
+    major: "",
+    yearOfStudy: "",
     bio: "",
-    location: "",
+    instagram: "",
+    tiktok: "",
+    youtube: "",
+    snapchat: "",
+    twitter: "",
   });
 
+  // Set active tab based on URL parameter
   useEffect(() => {
-    const shouldShowFade = localStorage.getItem('showWelcomeFade') === 'true';
-    setShowOverlay(shouldShowFade);
-
-    if (shouldShowFade) {
-      // Start fade in animation
-      setTimeout(() => {
-        setFadeIn(true);
-        // Remove overlay after animation completes
-        setTimeout(() => {
-          setShowOverlay(false);
-          localStorage.removeItem('showWelcomeFade'); // Remove the flag
-        }, 1000);
-      }, 100);
+    const searchParams = new URLSearchParams(location.search);
+    const tab = searchParams.get('tab');
+    if (tab === 'saved') {
+      setActiveTab('saved');
     }
+  }, [location]);
 
+  useEffect(() => {
     const fetchProfile = async () => {
       const userData = localStorage.getItem("user");
       if (!userData) {
@@ -44,233 +48,309 @@ const Profile = () => {
         setUser(user);
         setFormData({
           name: user.name || "",
+          major: user.major || "",
+          yearOfStudy: user.yearOfStudy || "",
           bio: user.bio || "",
-          location: user.location || "",
+          instagram: user.instagram || "",
+          tiktok: user.tiktok || "",
+          youtube: user.youtube || "",
+          snapchat: user.snapchat || "",
+          twitter: user.twitter || "",
         });
+
+        // Get saved listing IDs from localStorage
+        const savedListingIds = JSON.parse(localStorage.getItem('savedListings') || '[]');
+        
+        if (savedListingIds.length > 0) {
+          // Fetch all listings
+          const response = await axios.get('http://localhost:8000/api/listings/');
+          // Filter only the saved ones
+          const savedListingsData = response.data.filter(listing => savedListingIds.includes(listing.id));
+          setSavedListings(savedListingsData);
+        }
       } catch (err) {
-        console.error("Error parsing user data:", err);
-        localStorage.removeItem("user");
-        navigate("/signin");
+        console.error("Error fetching data:", err);
+        if (!err.response || err.response.status === 401) {
+          localStorage.removeItem("user");
+          navigate("/signin");
+        }
       }
     };
     fetchProfile();
   }, [navigate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    navigate("/signin");
+  const handleProfileImageClick = () => {
+    profileInputRef.current.click();
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const userData = localStorage.getItem("user");
-      if (!userData) {
-        navigate("/signin");
-        return;
-      }
-  
-      const user = JSON.parse(userData);
-      if (!user?.id) {  // Ensure user.id is available
-        console.error("User ID is missing from localStorage");
-        return;
-      }
-      
-      await axios.post(
-        "http://localhost:8000/appuser/edit-profile/",
-        {
-          user_id: user.id,
-          name: formData.name || user.name,
-          bio: formData.bio || "",
-          location: formData.location || "",
-        }
-      );
-  
-      // Update local state and storage
-      const updatedUser = { ...user, ...formData };
-      setUser(updatedUser);
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-  
-      setIsEditing(false);
-    } catch (error) {
-      console.error("Error updating profile:", error);
-    }
+  const handleCoverPhotoClick = () => {
+    coverInputRef.current.click();
   };
 
-
-  const handleImageClick = () => {
-    fileInputRef.current.click();
-  };
-
-  const handleImageChange = async (e) => {
+  const handleImageChange = async (e, type) => {
     const file = e.target.files[0];
     if (file) {
       try {
-        // Create a preview URL for immediate display
         const imageUrl = URL.createObjectURL(file);
-        setProfileImage(imageUrl);
-
-        // Here you would typically upload the image to your backend
-        // const formData = new FormData();
-        // formData.append('profile_picture', file);
-        // await axios.post('http://localhost:8000/appuser/upload-profile-picture/', formData);
-        
+        if (type === 'profile') {
+          setProfileImage(imageUrl);
+        } else {
+          setCoverPhoto(imageUrl);
+        }
       } catch (error) {
         console.error('Error uploading image:', error);
       }
     }
   };
 
-  return (
-    <div className="min-w-screen min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 relative">
-      {/* White overlay that fades out */}
-      {showOverlay && (
-        <div className={`absolute inset-0 bg-white transition-opacity duration-1000 ${fadeIn ? 'opacity-0' : 'opacity-100'} z-50`} />
-      )}
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/signin');
+  };
+
+  const handleSubmit = async (formData) => {
+    try {
+      // Create a copy of formData and remove any undefined or empty string values
+      const cleanedFormData = Object.fromEntries(
+        Object.entries(formData).filter(([_, value]) => value !== undefined && value !== '')
+      );
+
+      const response = await axios.put(`http://localhost:8000/appuser/edit-profile/`, cleanedFormData, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
       
-      {/* Main content */}
-      <div className="w-full max-w-full mx-auto relative z-10">
-        {/* Header */}
-        <div className="bg-white shadow rounded-lg p-6 mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Profile</h1>
-              <p className="text-gray-600">Manage your account settings</p>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 text-sm font-medium text-red-600 hover:text-red-800"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
+      if (response.status === 200) {
+        // Update the local user data
+        const updatedUser = { ...user, ...cleanedFormData };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
+        setIsEditing(false);
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      // Keep the modal open if there's an error
+    }
+  };
 
-        {/* Profile Content */}
-        <div className="bg-white shadow rounded-lg p-6">
-          <div className="flex items-center space-x-6 mb-6">
-            <div 
-              onClick={handleImageClick}
-              className="h-24 w-24 bg-gray-200 rounded-full flex items-center justify-center cursor-pointer relative group overflow-hidden"
-            >
-              {profileImage ? (
-                <img src={profileImage} alt="Profile" className="h-full w-full object-cover" />
-              ) : (
-                <span className="text-3xl text-gray-500">
-                  {user?.email?.[0]?.toUpperCase() || "?"}
-                </span>
-              )}
-              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <span className="text-white text-sm">Change Photo</span>
-              </div>
-            </div>
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleImageChange}
-              accept="image/*"
-              className="hidden"
-            />
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">
-                {formData.name || user?.email || "User"}
-              </h2>
-              <p className="text-gray-600">Member since {new Date().toLocaleDateString()}</p>
-            </div>
-          </div>
-
-          {isEditing ? (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Name</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-black shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Bio</label>
-                <textarea
-                  value={formData.bio}
-                  onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                  rows={3}
-                  className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-black shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Location</label>
-                <input
-                  type="text"
-                  value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-black shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-              </div>
-              <div className="flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={() => setIsEditing(false)}
-                  className="px-4 py-2 text-sm font-medium text-black bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-sm font-medium text-white bg-black rounded-md"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </form>
-          ) : (
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-medium text-gray-900">About</h3>
-                <p className="mt-1 text-gray-600">{formData.bio || "No bio yet"}</p>
-              </div>
-              <div>
-                <h3 className="text-lg font-medium text-gray-900">Location</h3>
-                <p className="mt-1 text-gray-600">{formData.location || "Not specified"}</p>
-              </div>
-              <div className="flex justify-end">
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="px-4 py-2 text-sm font-medium text-white bg-black rounded-md"
-                >
-                  Edit Profile
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Additional Sections */}
-        <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <div className="bg-white shadow rounded-lg p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Account Settings</h3>
-            <div className="space-y-4">
-              <button className="w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-50 rounded-md">
-                Change Password
-              </button>
-              <button className="w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-50 rounded-md">
-                Notification Preferences
-              </button>
-              <button className="w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-50 rounded-md">
-                Privacy Settings
-              </button>
-            </div>
-          </div>
-
-          <div className="bg-white shadow rounded-lg p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Activity</h3>
-            <div className="space-y-4">
-              <p className="text-sm text-gray-600">No recent activity to show</p>
-            </div>
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Cover Photo Section */}
+      <div 
+        onClick={handleCoverPhotoClick}
+        className="relative h-64 bg-gray-200 cursor-pointer group"
+      >
+        {coverPhoto ? (
+          <img 
+            src={coverPhoto} 
+            alt="Cover" 
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-r from-blue-100 to-blue-50" />
+        )}
+        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-200 flex items-center justify-center">
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 text-white">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+            </svg>
           </div>
         </div>
       </div>
+
+      {/* Profile Content */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16">
+        <div className="relative">
+          {/* Profile Picture */}
+          <div 
+            onClick={handleProfileImageClick}
+            className="absolute -top-12 left-4 h-32 w-32 rounded-full border-4 border-white bg-white shadow-md cursor-pointer overflow-hidden"
+          >
+            {profileImage ? (
+              <img src={profileImage} alt="Profile" className="h-full w-full object-cover" />
+            ) : (
+              <div className="h-full w-full bg-gray-100 flex items-center justify-center">
+                <span className="text-3xl text-gray-400">
+                  {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "?"}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Name and Buttons */}
+          <div className="pt-20 pb-4 flex items-start justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {formData.name || "Student Name"}
+              </h1>
+              <p className="text-gray-600">
+                {formData.major} {formData.yearOfStudy ? `- ${formData.yearOfStudy}` : ""}
+              </p>
+            </div>
+            <div className="flex space-x-3">
+              <div
+                onClick={handleLogout}
+                className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center space-x-2 cursor-pointer"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                </svg>
+                <span>Logout</span>
+              </div>
+              <div
+                onClick={() => setIsEditing(true)}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2 cursor-pointer"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                </svg>
+                <span>Edit Profile</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8">
+              <div
+                onClick={() => setActiveTab('about')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm cursor-pointer ${
+                  activeTab === 'about'
+                    ? 'border-black text-black'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                About
+              </div>
+              <div
+                onClick={() => setActiveTab('listings')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm cursor-pointer ${
+                  activeTab === 'listings'
+                    ? 'border-black text-black'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Listings
+              </div>
+              <div
+                onClick={() => setActiveTab('saved')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm cursor-pointer ${
+                  activeTab === 'saved'
+                    ? 'border-black text-black'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Saved
+              </div>
+            </nav>
+          </div>
+
+          {/* Tab Content */}
+          <div className="py-6">
+            {activeTab === 'about' ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* About Section */}
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">About</h2>
+                  <p className="text-gray-600 whitespace-pre-wrap">
+                    {formData.bio || "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."}
+                  </p>
+                </div>
+
+                {/* Social Media Links */}
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Social Media</h2>
+                  <div className="space-y-3">
+                    {[
+                      { name: 'Instagram', icon: 'instagram', link: formData.instagram },
+                      { name: 'TikTok', icon: 'tiktok', link: formData.tiktok },
+                      { name: 'YouTube', icon: 'youtube', link: formData.youtube },
+                      { name: 'Snapchat', icon: 'snapchat', link: formData.snapchat },
+                      { name: 'Twitter', icon: 'twitter', link: formData.twitter },
+                    ].map((social) => (
+                      <div key={social.name} className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <span className="w-6 h-6 flex items-center justify-center">
+                            <i className={`fab fa-${social.icon}`}></i>
+                          </span>
+                          <span>{social.name}</span>
+                        </div>
+                        <div className="text-gray-400 hover:text-gray-600 cursor-pointer">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                          </svg>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : activeTab === 'listings' ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* Listings will be mapped here */}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {savedListings.length === 0 ? (
+                  <div className="col-span-full text-center py-8 text-gray-500">
+                    No saved listings yet
+                  </div>
+                ) : (
+                  savedListings.map((listing) => (
+                    <div 
+                      key={listing.id} 
+                      className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden"
+                      onClick={() => navigate(`/listing/${listing.id}`)}
+                    >
+                      <img 
+                        src={listing.image ? `http://localhost:8000/media/${listing.image.split('/media/')[1]}` : "/placeholder.png"} 
+                        alt={listing.title} 
+                        className="w-full h-48 object-cover"
+                      />
+                      <div className="p-4">
+                        <h3 className="text-lg font-semibold mb-2">{listing.title}</h3>
+                        <div className="flex items-center justify-between">
+                          <p className="text-gray-900 font-medium">${listing.price}</p>
+                          <p className="text-gray-500 text-sm">{listing.seller_name}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* EditProfileModal */}
+      <EditProfileModal
+        isOpen={isEditing}
+        onClose={() => setIsEditing(false)}
+        formData={formData}
+        setFormData={setFormData}
+        onSubmit={handleSubmit}
+      />
+
+      {/* Hidden file inputs */}
+      <input
+        type="file"
+        ref={profileInputRef}
+        onChange={(e) => handleImageChange(e, 'profile')}
+        accept="image/*"
+        className="hidden"
+      />
+      <input
+        type="file"
+        ref={coverInputRef}
+        onChange={(e) => handleImageChange(e, 'cover')}
+        accept="image/*"
+        className="hidden"
+      />
     </div>
   );
 };

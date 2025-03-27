@@ -2,9 +2,16 @@ from rest_framework import serializers
 from .models import *
 
 class ListingSerializer(serializers.ModelSerializer):
+    seller_name = serializers.SerializerMethodField()
+
     class Meta:
         model = Listing
         fields = '__all__'  # Exports all fields
+
+    def get_seller_name(self, obj):
+        if obj.seller:
+            return obj.seller.username
+        return None
 
 
 class BookListingSerializer(ListingSerializer):

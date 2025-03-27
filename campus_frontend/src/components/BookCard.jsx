@@ -1,7 +1,15 @@
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 
-const BookCard = ({ id, title, course_code, price, condition, image, author, edition, category }) => {
+const BookCard = ({ id, title, course_code, price, condition, image, author, edition, category, seller_name, seller_id }) => {
   const navigate = useNavigate();
+  const [isSaved, setIsSaved] = useState(false);
+
+  // Check if listing is saved on component mount
+  useEffect(() => {
+    const savedListings = JSON.parse(localStorage.getItem('savedListings') || '[]');
+    setIsSaved(savedListings.includes(id));
+  }, [id]);
 
   // Condition color mapping
   const conditionColors = {
@@ -39,52 +47,118 @@ const BookCard = ({ id, title, course_code, price, condition, image, author, edi
     navigate(`/listing/${id}`);
   };
 
+  const handleMessageClick = (e) => {
+    e.stopPropagation();
+    const userData = localStorage.getItem('user');
+    if (!userData) {
+      navigate('/signin?returnTo=' + encodeURIComponent(window.location.pathname));
+      return;
+    }
+    navigate(`/messages?seller=${seller_id}&listing=${id}`);
+  };
+
+  const handleSaveClick = (e) => {
+    e.stopPropagation();
+    const userData = localStorage.getItem('user');
+    if (!userData) {
+      navigate('/signin?returnTo=' + encodeURIComponent(window.location.pathname));
+      return;
+    }
+    
+    const savedListings = JSON.parse(localStorage.getItem('savedListings') || '[]');
+    if (isSaved) {
+      const newSavedListings = savedListings.filter(listingId => listingId !== id);
+      localStorage.setItem('savedListings', JSON.stringify(newSavedListings));
+    } else {
+      savedListings.push(id);
+      localStorage.setItem('savedListings', JSON.stringify(savedListings));
+    }
+    setIsSaved(!isSaved);
+  };
+
   return (
     <div 
       onClick={handleClick}
-      className="border p-4 rounded-lg shadow-sm hover:shadow-lg hover:border-black transition-all duration-200 bg-white relative group cursor-pointer"
+      className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer relative group"
     >
+      {/* Save Button - Absolute positioned on image */}
+      <div 
+        className="absolute top-2 right-2 z-10 p-1.5 rounded-full bg-white/90 hover:bg-white shadow-sm transition-colors cursor-pointer"
+        onClick={handleSaveClick}
+        title={isSaved ? "Remove from saved" : "Save listing"}
+      >
+        {isSaved ? (
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-red-500">
+            <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
+          </svg>
+        ) : (
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-gray-700">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+          </svg>
+        )}
+      </div>
+
       {/* Image Section */}
-      <div className="aspect-square mb-4 overflow-hidden rounded-lg bg-gray-100 flex items-center justify-center">
+      <div className="aspect-[16/10] w-full">
         <img
           src={imageUrl}
           alt={title}
-          className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+          className="w-full h-full object-cover"
         />
       </div>
 
-      {/* Course Code */}
-      <h3 className="text-lg font-bold text-gray-900 mb-1">{course_code}</h3>
+      {/* Content Section */}
+      <div className="p-3">
+        {/* Price */}
+        <div className="flex items-center justify-between mb-1">
+          <p className="text-lg font-bold text-gray-900">CA${price || "0.00"}</p>
+          {/* Category Badge */}
+          {category && (
+            <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${categoryColors[category] || "bg-gray-200 text-gray-700"}`}>
+              {categoryLabels[category] || category}
+            </span>
+          )}
+        </div>
 
-      {/* Title and Author */}
-      <div className="mb-2">
-        <p className="text-sm text-gray-600">{title || "Untitled"}</p>
-        {author && <p className="text-sm text-gray-500">{author}</p>}
-        {edition && <p className="text-xs text-gray-400">Edition: {edition}</p>}
-      </div>
+        {/* Title */}
+        <h3 className="text-base font-medium text-gray-800 mb-1">{title || course_code || "Untitled"}</h3>
 
-      {/* Price */}
-      <p className="text-2xl font-bold text-emerald-600 mb-2">${price || "0.00"}</p>
+        {/* Location & Details */}
+        <div className="flex items-center text-sm text-gray-500 mb-2">
+          <span className="truncate">{author || "No details available"}</span>
+          {condition && (
+            <>
+              <span className="mx-1.5">•</span>
+              <span className="font-medium">{condition}</span>
+            </>
+          )}
+        </div>
 
-      {/* Badges Container */}
-      <div className="flex flex-wrap gap-2">
-        {/* Category Badge */}
-        {category ? (
-          <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${categoryColors[category] || "bg-gray-200 text-gray-700"}`}>
-            {categoryLabels[category] || category}
-          </span>
-        ) : (
-          <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-700">
-            Uncategorized
-          </span>
-        )}
+        {/* Bottom Bar */}
+        <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+          {/* Seller Profile */}
+          <div className="flex items-center space-x-2">
+            <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center">
+              <span className="text-xs font-medium text-gray-600">
+                {seller_name ? seller_name[0].toUpperCase() : '?'}
+              </span>
+            </div>
+            <span className="hidden sm:block text-sm text-gray-600 truncate max-w-[120px]">
+              {seller_name || 'Anonymous'}
+            </span>
+          </div>
 
-        {/* Condition Badge - Only show if condition exists and is not empty/null */}
-        {condition && condition !== '' && condition !== null && (
-          <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${conditionColors[condition.toUpperCase()] || "bg-gray-200 text-gray-700"}`}>
-            {condition}
-          </span>
-        )}
+          {/* Message Button */}
+          <div
+            onClick={handleMessageClick}
+            className="flex items-center space-x-1 px-2 py-1 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors text-gray-700"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+            </svg>
+            <span className=" sm:block text-sm">Message</span>
+          </div>
+        </div>
       </div>
     </div>
   );
