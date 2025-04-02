@@ -20,7 +20,7 @@ const Marketplace = () => {
       const data = await listingsService.getAllListings();
       console.log('Received listings:', data);
       // Sort the listings by creation date before setting them
-      const sortedListings = data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      const sortedListings = data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       setListings(sortedListings);
       setLoading(false);
     } catch (err) {
@@ -95,10 +95,10 @@ const Marketplace = () => {
               {/* Post Listing Card */}
               <div 
                 onClick={() => navigate('/post-listing')}
-                className="hidden sm:block border-2 border-dashed border-gray-300 p-4 rounded-lg shadow-sm hover:shadow-lg hover:border-black transition-all duration-200 bg-white cursor-pointer"
+                className="hidden sm:block bg-white border-2 border-dashed border-gray-300 rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:border-blue-400 hover:border-opacity-50 transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
               >
                 {/* Image Section */}
-                <div className="aspect-square mb-4 overflow-hidden rounded-lg bg-gray-100 flex items-center justify-center border-2  border-gray-300">
+                <div className="aspect-[16/10] w-full bg-gray-100 flex items-center justify-center">
                   <div className="flex flex-col items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 text-gray-400 mb-3">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -108,13 +108,20 @@ const Marketplace = () => {
                   </div>
                 </div>
 
-                {/* Empty space to match BookCard layout */}
-                <h3 className="text-lg font-bold text-transparent mb-1">Course</h3>
-                <div className="mb-2">
-                  <p className="text-sm text-transparent">Title</p>
+                {/* Content Section */}
+                <div className="p-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-lg font-bold text-transparent">Price</p>
+                  </div>
+                  <h3 className="text-base font-medium text-transparent mb-1">Title</h3>
+                  <div className="flex items-center text-sm text-transparent mb-2">Details</div>
+                  <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-7 h-7 rounded-full bg-transparent"></div>
+                      <span className="text-sm text-transparent">Seller</span>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-2xl font-bold text-transparent mb-2">Price</p>
-                <div className="h-[26px]"></div> {/* Space for condition badge */}
               </div>
 
               {filteredListings.map((listing) => (

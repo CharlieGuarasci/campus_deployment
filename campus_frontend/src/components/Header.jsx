@@ -46,6 +46,7 @@ const Header = () => {
   const searchInputRef = useRef(null);
   const filtersRef = useRef(null);
   const [selectedCount, setSelectedCount] = useState(0);
+  const closeTimeoutRef = useRef(null);
   
   const form = useForm({
     defaultValues: {
@@ -133,6 +134,28 @@ const Header = () => {
       setIsSearchExpanded(false);
     }
   };
+
+  const handleMouseLeave = () => {
+    closeTimeoutRef.current = setTimeout(() => {
+      setShowDropdown(false);
+    }, 200); // 200ms delay
+  };
+
+  const handleMouseEnter = () => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+    }
+    setShowDropdown(true);
+  };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <TooltipProvider>
@@ -248,7 +271,8 @@ const Header = () => {
                   <div className="relative" ref={dropdownRef}>
                     <div 
                       onClick={() => setShowDropdown(!showDropdown)}
-                      onMouseEnter={() => setShowDropdown(true)}
+                      onMouseEnter={handleMouseEnter}
+                      onMouseLeave={handleMouseLeave}
                       className="border border-gray-300 p-2 rounded-md hover:bg-gray-100 transition-colors h-10 w-10 flex items-center justify-center cursor-pointer"
                     >
                       {location.pathname === "/profile" ? (
@@ -266,7 +290,8 @@ const Header = () => {
                     {showDropdown && (
                       <div 
                         className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
-                        onMouseLeave={() => setShowDropdown(false)}
+                        onMouseEnter={handleMouseEnter}
+                        onMouseLeave={handleMouseLeave}
                       >
                         {/* User Info Section */}
                         <div className="p-4 border-b border-gray-200">

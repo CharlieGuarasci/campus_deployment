@@ -43,6 +43,12 @@ const BookCard = ({ id, title, course_code, price, condition, image, author, edi
   const imageUrl = image ? `http://localhost:8000/media/${image.split('/media/')[1]}` : placeholderImage;
 
   const handleClick = () => {
+    // Scroll to top before navigating
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'instant'
+    });
     console.log('Navigating to listing:', id);
     navigate(`/listing/${id}`);
   };
@@ -79,7 +85,7 @@ const BookCard = ({ id, title, course_code, price, condition, image, author, edi
   return (
     <div 
       onClick={handleClick}
-      className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer relative group"
+      className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
     >
       {/* Save Button - Absolute positioned on image */}
       <div 
