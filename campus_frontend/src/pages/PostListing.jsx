@@ -181,10 +181,15 @@ const PostListing = () => {
         });
         console.log("📡 FormData Entries:", Object.fromEntries(submitData));
 
+        const token = localStorage.getItem('access_token');
+
         const response = await fetch(`http://127.0.0.1:8000${endpoint}`, {
-            method: "POST",
-            body: submitData,
-        });
+          method: "POST",
+          body: submitData,
+          headers: {
+            Authorization: `Bearer ${token}`, 
+          },
+       });
 
         if (!response.ok) {
             const errorData = await response.json(); // Get error details

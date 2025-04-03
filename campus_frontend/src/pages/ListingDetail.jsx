@@ -366,21 +366,23 @@ const ListingDetail = () => {
                   <div className="flex items-start space-x-4">
                     <div className="flex-shrink-0">
                       <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
-                        {listing.seller_avatar ? (
-                          <img
-                            src={`http://localhost:8000${listing.seller_avatar}`}
-                            alt={listing.seller_name}
-                            className="h-12 w-12 rounded-full object-cover"
-                          />
-                        ) : (
-                          <span className="text-lg font-medium text-gray-600">
-                            {listing.seller_name ? listing.seller_name[0].toUpperCase() : 'S'}
-                          </span>
-                        )}
+                      {listing.seller?.profile_picture ? (
+                        <img
+                          src={`http://localhost:8000${listing.seller.profile_picture}`}
+                          alt={listing.seller?.username || 'Seller'}
+                          className="h-12 w-12 rounded-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-lg font-medium text-gray-600">
+                          {listing.seller?.username?.[0]?.toUpperCase() || 'S'}
+                        </span>
+                      )}
                       </div>
                     </div>
                     <div className="flex-1">
-                      <h4 className="text-lg font-medium text-gray-900">{listing.seller_name || 'Anonymous'}</h4>
+                    <h4 className="text-lg font-medium text-gray-900">
+                      {listing.seller?.username || listing.seller?.name || 'Anonymous'}
+                    </h4>
                       {listing.seller_program && (
                         <p className="text-sm text-gray-600 mt-1">
                           {listing.seller_program} • {listing.seller_year_of_study}
@@ -390,9 +392,11 @@ const ListingDetail = () => {
                         <div className="text-sm text-gray-600">
                           <span className="font-medium">{listing.seller_listing_count || 0}</span> listings
                         </div>
-                        <div className="text-sm text-gray-600">
-                          Member since {new Date(listing.seller_joined_date).toLocaleDateString()}
-                        </div>
+                        {listing.seller?.created_at && (
+                            <div className="text-sm text-gray-600">
+                              Member since {new Date(listing.seller.created_at).toLocaleDateString()}
+                            </div>
+                          )}
                       </div>
                     </div>
                   </div>

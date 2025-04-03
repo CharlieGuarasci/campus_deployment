@@ -1,8 +1,16 @@
 from rest_framework import serializers
 from .models import *
 
+
+class SellerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AppUser
+        fields = ['id', 'name', 'username', 'created_at', 'profile_picture']
+
+
 class ListingSerializer(serializers.ModelSerializer):
-    seller_name = serializers.SerializerMethodField()
+    seller = SellerSerializer(read_only=True)
+
 
     class Meta:
         model = Listing

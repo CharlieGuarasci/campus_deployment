@@ -35,6 +35,9 @@ def edit_profile(request):
         user.username = data.get("username", user.username)
         user.bio = data.get("bio", user.bio)
         user.location = data.get("location", user.location)
+
+        if 'profile_picture' in request.FILES:
+            user.profile_picture = request.FILES['profile_picture']
         user.save()
 
         return Response({"message": "Profile updated successfully", "user": {

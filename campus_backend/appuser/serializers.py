@@ -3,6 +3,8 @@ from rest_framework import serializers
 from .models import AppUser
 
 class UserSerializer(serializers.ModelSerializer):
+
+    profile_picture = serializers.ImageField(required=False, allow_null=True)
     class Meta:
         model = AppUser
         fields = ['id', 'name', 'email', 'year', 'username', 'bio', 'location', 'is_email_verified']

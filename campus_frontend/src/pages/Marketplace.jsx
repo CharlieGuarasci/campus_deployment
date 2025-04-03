@@ -126,11 +126,11 @@ const Marketplace = () => {
 
               {filteredListings.map((listing) => (
                 <BookCard 
-                  key={listing.id} 
-                  {...listing} 
-                  seller_name={listing.seller_name}
-                  seller_id={listing.seller}
-                />
+                key={listing.id} 
+                {...listing} 
+                seller_name={listing.seller?.name || "Anonymous"}
+                seller_id={listing.seller?.id}
+              />
               ))}
             </div>
           )}

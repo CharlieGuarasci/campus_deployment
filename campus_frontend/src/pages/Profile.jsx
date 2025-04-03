@@ -11,6 +11,7 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [coverPhoto, setCoverPhoto] = useState(null);
   const [profileImage, setProfileImage] = useState(null);
+  const [profileImageFile, setProfileImageFile] = useState(null);
   const [savedListings, setSavedListings] = useState([]);
   const profileInputRef = useRef(null);
   const coverInputRef = useRef(null);
@@ -93,7 +94,8 @@ const Profile = () => {
       try {
         const imageUrl = URL.createObjectURL(file);
         if (type === 'profile') {
-          setProfileImage(imageUrl);
+          setProfileImage(imageUrl);        
+          setProfileImageFile(file); 
         } else {
           setCoverPhoto(imageUrl);
         }
@@ -111,30 +113,37 @@ const Profile = () => {
 
   const handleSubmit = async (formData) => {
     try {
-      // Create a copy of formData and remove any undefined or empty string values
-      const cleanedFormData = Object.fromEntries(
-        Object.entries(formData).filter(([_, value]) => value !== undefined && value !== '')
-      );
-
-      const response = await axios.put(`http://localhost:8000/appuser/edit-profile/`, cleanedFormData, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
+      const data = new FormData();
+      
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value !== undefined && value !== '') {
+          data.append(key, value);
         }
       });
+  
+      if (profileImageFile) {
+        data.append("profile_picture", profileImageFile); 
+      }
       
+  
+      const response = await axios.put(`http://localhost:8000/appuser/edit-profile/`, data, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+  
       if (response.status === 200) {
-        // Update the local user data
-        const updatedUser = { ...user, ...cleanedFormData };
+        const updatedUser = response.data.user;
         localStorage.setItem('user', JSON.stringify(updatedUser));
         setUser(updatedUser);
         setIsEditing(false);
       }
     } catch (error) {
-      console.error('Error updating profile:', error);
-      // Keep the modal open if there's an error
+      console.error("Error updating profile:", error);
     }
   };
+  
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -171,14 +180,20 @@ const Profile = () => {
             className="absolute -top-12 left-4 h-32 w-32 rounded-full border-4 border-white bg-white shadow-md cursor-pointer overflow-hidden"
           >
             {profileImage ? (
-              <img src={profileImage} alt="Profile" className="h-full w-full object-cover" />
-            ) : (
-              <div className="h-full w-full bg-gray-100 flex items-center justify-center">
-                <span className="text-3xl text-gray-400">
-                  {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "?"}
-                </span>
-              </div>
-            )}
+                <img src={profileImage} alt="Profile" className="h-full w-full object-cover" />
+              ) : user?.profile_picture ? (
+                <img
+                  src={`http://localhost:8000${user.profile_picture}`}
+                  alt="Profile"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="h-full w-full bg-gray-100 flex items-center justify-center">
+                  <span className="text-3xl text-gray-400">
+                    {user?.name?.[0]?.toUpperCase() || "?"}
+                  </span>
+                </div>
+              )}
           </div>
 
           {/* Name and Buttons */}

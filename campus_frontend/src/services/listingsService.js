@@ -24,57 +24,73 @@ export const listingsService = {
     }
   },
 
-  createListing: async (listingData, category) => {
-    try {
-      let endpoint = API_ENDPOINT;
-      switch (category) {
-        case "BOOKS":
-          endpoint += "books/";
-          break;
-        case "SUBLETS":
-          endpoint += "sublets/";
-          break;
-        case "ROOMMATES":
-          endpoint += "roommates/";
-          break;
-        case "RIDESHARE":
-          endpoint += "rideshare/";
-          break;
-        case "EVENTS":
-        case "OTHER":
-          endpoint += "events/";
-          break;
-        default:
-          break;
-      }
-      const response = await axios.post(endpoint, listingData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Error creating listing:', error);
-      throw error;
+ createListing: async (listingData, category) => {
+  try {
+    let endpoint = API_ENDPOINT;
+    switch (category) {
+      case "BOOKS":
+        endpoint += "books/";
+        break;
+      case "SUBLETS":
+        endpoint += "sublets/";
+        break;
+      case "ROOMMATES":
+        endpoint += "roommates/";
+        break;
+      case "RIDESHARE":
+        endpoint += "rideshare/";
+        break;
+      case "EVENTS":
+      case "OTHER":
+        endpoint += "events/";
+        break;
+      default:
+        break;
     }
-  },
+
+    const accessToken = localStorage.getItem("access_token");
+
+    const response = await axios.post(endpoint, listingData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'Authorization': `Bearer ${accessToken}` // ✅ THIS IS CRUCIAL
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Error creating listing:', error);
+    throw error;
+  }
+},
+
 
   updateListing: async (id, listingData) => {
     try {
-      const response = await axios.put(`${API_ENDPOINT}${id}/`, listingData);
+      const accessToken = localStorage.getItem("access_token");
+      const response = await axios.put(`${API_ENDPOINT}${id}/`, listingData, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`  // 👈 ADD THIS
+        }
+      });
       return response.data;
     } catch (error) {
       console.error('Error updating listing:', error);
       throw error;
     }
   },
-
+  
   deleteListing: async (id) => {
     try {
-      await axios.delete(`${API_ENDPOINT}${id}/`);
+      const accessToken = localStorage.getItem("access_token");
+      await axios.delete(`${API_ENDPOINT}${id}/`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`  // 👈 ADD THIS
+        }
+      });
     } catch (error) {
       console.error('Error deleting listing:', error);
       throw error;
     }
-  },
+  },  
 };
